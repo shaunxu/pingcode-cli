@@ -120,9 +120,9 @@ async fn main() -> Result<(), AnyError> {
 
     if let Some(_) = clap.subcommand_matches("test") {
         print!("Connecting {} ... ", api_endpoint);
-        let res = client.auth().await;
+        let res = client.ping().await;
         match res {
-            Ok(()) => println!("Ok"),
+            Ok(pong) => println!("Ok: {}", pong),
             Err(e) => println!("Failed: {}", e),
         }
     } else {
