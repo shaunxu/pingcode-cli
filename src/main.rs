@@ -24,40 +24,42 @@ async fn main() -> Result<(), AnyError> {
         .help_message("Help")
         .version_message("Version")
         .arg(
-            Arg::with_name("api-endpoint")
+            Arg::with_name("api_endpoint")
                 .short("e")
                 .long("api-endpoint")
                 .help("Worktile REST API endpoint")
                 .takes_value(true)
                 .required(true)
-                .default_value("https://open.worktile.com")
-                .display_order(1),
+                .default_value("https://open.worktile.com"),
         )
-        .arg(
-            Arg::with_name("client_id")
-                .short("c")
-                .long("client-id")
-                .help("The Client ID in Worktile REST API application")
-                .takes_value(true)
-                .required(true)
-                .display_order(2),
-        )
-        .arg(
-            Arg::with_name("client_secret")
-                .short("s")
-                .long("client-secret")
-                .help("The Client Secret in Worktile REST API application")
-                .takes_value(true)
-                .required(true)
-                .display_order(3),
-        )
-        .arg(
-            Arg::with_name("content")
-                .short("x")
-                .long("content")
-                .help("Message content send to Worktile REST API in JSON format")
-                .takes_value(true)
-                .display_order(4),
+        .subcommand(
+            SubCommand::with_name("login")
+                .about("Login Worktile REST API with client id and client secret")
+                .arg(
+                    Arg::with_name("client_id")
+                        .short("c")
+                        .long("client-id")
+                        .help("The Client ID in Worktile REST API application")
+                        .takes_value(true)
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("client_secret")
+                        .short("s")
+                        .long("client-secret")
+                        .help("The Client Secret in Worktile REST API application")
+                        .takes_value(true)
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("api_endpoint")
+                        .short("e")
+                        .long("api-endpoint")
+                        .help("Worktile REST API endpoint")
+                        .takes_value(true)
+                        .required(true)
+                        .default_value("https://open.worktile.com"),
+                ),
         )
         .subcommand(
             SubCommand::with_name("test")
@@ -109,17 +111,18 @@ async fn main() -> Result<(), AnyError> {
         )
         .get_matches();
 
-    let api_endpoint = String::from(clap.value_of("api-endpoint").unwrap());
-    let client_id = String::from(clap.value_of("client_id").unwrap());
-    let client_secret = String::from(clap.value_of("client_secret").unwrap());
-    let mut client = wt_client::WTClient::new(
-        api_endpoint.clone(),
-        client_id.clone(),
-        client_secret.clone(),
-    );
+    let mut client = wt_client::WTClient::new(None);
 
-    if let Some(_) = clap.subcommand_matches("test") {
-        print!("Connecting {} ... ", api_endpoint);
+    if let Some(subcommand) = clap.subcommand_matches("login") {
+        let client_id = String::from(subcommand.value_of("client_id").unwrap());
+        let client_secret = String::from(subcommand.value_of("client_secret").unwrap());
+        let api_endpoint = String::from(subcommand.value_of("api_endpoint").unwrap());
+        match client.auth(&client_id, &client_secret, &api_endpoint).await {
+            Ok(()) => println!("Login successful."),
+            Err(e) => println!("Failed: {}", e),
+        }
+    } else if let Some(_) = clap.subcommand_matches("test") {
+        print!("Connecting ... ");
         let res = client.ping().await;
         match res {
             Ok(pong) => println!("Ok: {}", pong),
