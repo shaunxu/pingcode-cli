@@ -4,6 +4,8 @@ extern crate clap;
 use clap::{Arg, ArgGroup, SubCommand};
 use std::error::Error;
 
+mod args;
+mod json_printer;
 mod wt_client;
 
 type AnyError = Box<dyn Error>;
@@ -23,15 +25,6 @@ async fn main() -> Result<(), AnyError> {
         .template(CLAP_TEMPLATE)
         .help_message("Help")
         .version_message("Version")
-        .arg(
-            Arg::with_name("api_endpoint")
-                .short("e")
-                .long("api-endpoint")
-                .help("Worktile REST API endpoint")
-                .takes_value(true)
-                .required(true)
-                .default_value("https://open.worktile.com"),
-        )
         .subcommand(
             SubCommand::with_name("login")
                 .about("Login Worktile REST API with client id and client secret")
@@ -63,52 +56,90 @@ async fn main() -> Result<(), AnyError> {
         )
         .subcommand(
             SubCommand::with_name("test")
-                .about("Test the connective and verify client_id/client_secret"),
+                .about("Test the connective and verify authentication information"),
         )
         .subcommand(
-            SubCommand::with_name("devops")
-                .about("Manage DevOps information which displayed in Agile workitem dialog")
+            SubCommand::with_name("agile")
+                .about("Manage projects and workitems in agile application")
                 .subcommand(
-                    SubCommand::with_name("scm")
-                        .arg(
-                            Arg::with_name("create")
-                                .short("c")
-                                .long("create")
-                                .help("Create a new SCM product")
-                                .display_order(1),
+                    SubCommand::with_name("project")
+                        .about("Manage projects")
+                        .subcommand(
+                            SubCommand::with_name("get")
+                                .about("Get a project by id")
+                                .arg(
+                                    Arg::with_name("id")
+                                        .long("id")
+                                        .takes_value(true)
+                                        .required(true)
+                                        .help("The id of the project will be get"),
+                                )
+                                .arg(args::GeneralArgs::pretty()),
                         )
-                        .arg(
-                            Arg::with_name("update")
-                                .short("u")
-                                .long("update")
-                                .help("Update an existing SCM product")
-                                .display_order(2),
-                        )
-                        .arg(
-                            Arg::with_name("get")
-                                .short("g")
-                                .long("get")
-                                .help("Get one SCM product by its ID")
-                                .display_order(3),
-                        )
-                        .arg(
-                            Arg::with_name("list")
-                                .short("l")
-                                .long("list")
-                                .help("List all SCM products")
-                                .display_order(4),
-                        )
-                        .group(
-                            ArgGroup::with_name("action")
-                                .args(&["create", "update", "get", "list"]),
+                        .subcommand(
+                            SubCommand::with_name("list")
+                                .about("Get all projects")
+                                .arg(
+                                    Arg::with_name("identifier")
+                                        .long("identifier")
+                                        .takes_value(true)
+                                        .required(false)
+                                        .help("The identifier of the project"),
+                                )
+                                .arg(
+                                    Arg::with_name("type")
+                                        .long("type")
+                                        .takes_value(true)
+                                        .required(false)
+                                        .possible_values(&["scrum", "kanban", "bug"])
+                                        .help("The type of projects"),
+                                )
+                                .arg(args::GeneralArgs::page_index())
+                                .arg(args::GeneralArgs::page_size())
+                                .arg(args::GeneralArgs::pretty()),
                         ),
-                )
-                .subcommand(SubCommand::with_name("user"))
-                .subcommand(SubCommand::with_name("repo"))
-                .subcommand(SubCommand::with_name("commit"))
-                .subcommand(SubCommand::with_name("branch"))
-                .subcommand(SubCommand::with_name("pr")),
+                ),
         )
+        // .subcommand(
+        //     SubCommand::with_name("devops")
+        //         .about("Manage DevOps information which displayed in Agile workitem dialog")
+        //         .subcommand(
+        //             SubCommand::with_name("scm")
+        //                 .arg(
+        //                     Arg::with_name("create")
+        //                         .short("c")
+        //                         .long("create")
+        //                         .help("Create a new SCM product"),
+        //                 )
+        //                 .arg(
+        //                     Arg::with_name("update")
+        //                         .short("u")
+        //                         .long("update")
+        //                         .help("Update an existing SCM product"),
+        //                 )
+        //                 .arg(
+        //                     Arg::with_name("get")
+        //                         .short("g")
+        //                         .long("get")
+        //                         .help("Get one SCM product by its ID"),
+        //                 )
+        //                 .arg(
+        //                     Arg::with_name("list")
+        //                         .short("l")
+        //                         .long("list")
+        //                         .help("List all SCM products"),
+        //                 )
+        //                 .group(
+        //                     ArgGroup::with_name("action")
+        //                         .args(&["create", "update", "get", "list"]),
+        //                 ),
+        //         )
+        //         .subcommand(SubCommand::with_name("user"))
+        //         .subcommand(SubCommand::with_name("repo"))
+        //         .subcommand(SubCommand::with_name("commit"))
+        //         .subcommand(SubCommand::with_name("branch"))
+        //         .subcommand(SubCommand::with_name("pr")),
+        // )
         .get_matches();
 
     let mut client = wt_client::WTClient::new(None);
@@ -128,9 +159,31 @@ async fn main() -> Result<(), AnyError> {
             Ok(pong) => println!("Ok: {}", pong),
             Err(e) => println!("Failed: {}", e),
         }
+    } else if let Some(subcommand) = clap.subcommand_matches("agile") {
+        if let Some(subcommand) = subcommand.subcommand_matches("project") {
+            if let Some(subcommand) = subcommand.subcommand_matches("get") {
+                let id = String::from(subcommand.value_of("id").unwrap());
+                let res = client.get_project_by_id(&id).await?;
+                json_printer::JSONPrinter::print_by_arg(res, subcommand);
+            } else if let Some(subcommand) = subcommand.subcommand_matches("list") {
+                let res = client
+                    .get_projects(
+                        subcommand.value_of("identifier"),
+                        subcommand.value_of("type"),
+                        subcommand.value_of("page_index"),
+                        subcommand.value_of("page_size"),
+                    )
+                    .await?;
+                json_printer::JSONPrinter::print_by_arg(res, subcommand);
+            } else {
+                println!("{}", subcommand.usage());
+            }
+        } else {
+            println!("{}", subcommand.usage());
+        }
     } else {
         println!("{}", clap.usage());
-    };
+    }
 
     Ok(())
 }

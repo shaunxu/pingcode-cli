@@ -4,6 +4,8 @@ use reqwest::{Client, Method};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 
+type ApiResult = Result<serde_json::Value, AnyError>;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WTError {
     code: String,
@@ -114,6 +116,7 @@ impl WTClient {
         method: Method,
         api_endpoint: &str,
         uri: &str,
+        query: Option<std::vec::Vec<(&str, String)>>,
         body: Option<&serde_json::Value>,
         headers: Option<HeaderMap>,
     ) -> Result<serde_json::Value, AnyError> {
@@ -125,6 +128,10 @@ impl WTClient {
         };
         req = match body {
             Some(body) => req.json(body),
+            None => req,
+        };
+        req = match query {
+            Some(queries) => req.query(&queries),
             None => req,
         };
 
@@ -143,8 +150,9 @@ impl WTClient {
         &mut self,
         method: Method,
         uri: &str,
+        query: Option<std::vec::Vec<(&str, String)>>,
         body: Option<&serde_json::Value>,
-    ) -> Result<serde_json::Value, AnyError> {
+    ) -> ApiResult {
         let api_endpoint = self
             .config
             .host
@@ -183,8 +191,16 @@ impl WTClient {
             .parse()
             .unwrap(),
         );
-        self.request_internal(method, &api_endpoint.unwrap(), uri, body, Some(headers))
-            .await
+        headers.insert("content-type", "application/json".parse().unwrap());
+        self.request_internal(
+            method,
+            &api_endpoint.unwrap(),
+            uri,
+            query,
+            body,
+            Some(headers),
+        )
+        .await
     }
 
     pub async fn auth(
@@ -198,7 +214,7 @@ impl WTClient {
             client_id, client_secret
         );
         let res: AuthResponse = serde_json::from_value(
-            self.request_internal(Method::GET, &api_endpoint, &uri, None, None)
+            self.request_internal(Method::GET, &api_endpoint, &uri, None, None, None)
                 .await?,
         )?;
         self.config.host = Some(WTClientHost {
@@ -215,12 +231,55 @@ impl WTClient {
     }
 
     pub async fn ping(&mut self) -> Result<String, AnyError> {
-        let res = self.request(Method::GET, "v1/auth/ping", None).await?;
+        let res = self
+            .request(Method::GET, "v1/auth/ping", None, None)
+            .await?;
         let res: serde_json::Value = serde_json::from_value(res)?;
         if let serde_json::Value::String(pong) = &res["data"] {
             Ok(pong.clone())
         } else {
             Err(WTError::new_boxed("000000", "Invalid ping response"))
         }
+    }
+
+    pub async fn get_project_by_id(&mut self, id: &String) -> ApiResult {
+        Ok(self
+            .request(
+                Method::GET,
+                &format!("v1/agile/projects/{}", id),
+                None,
+                None,
+            )
+            .await?)
+    }
+
+    pub async fn get_projects(
+        &mut self,
+        identifier: Option<&str>,
+        project_type: Option<&str>,
+        page_index: Option<&str>,
+        page_size: Option<&str>,
+    ) -> ApiResult {
+        let mut queries = std::vec::Vec::<(&str, String)>::new();
+        if let Some(identifier) = identifier {
+            queries.push(("identifier", String::from(identifier)));
+        }
+        if let Some(project_type) = project_type {
+            queries.push(("type", String::from(project_type)));
+        }
+        if let Some(page_index) = page_index {
+            queries.push(("page_index", String::from(page_index)));
+        }
+        if let Some(page_size) = page_size {
+            queries.push(("page_size", String::from(page_size)));
+        }
+        Ok(self
+            .request(
+                Method::GET,
+                "v1/agile/projects",
+                Some(queries),
+                None,
+            )
+            .await?)
     }
 }
