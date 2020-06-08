@@ -282,4 +282,41 @@ impl WTClient {
             )
             .await?)
     }
+
+    pub async fn get_user_by_id(&mut self, id: &String) -> ApiResult {
+        Ok(self
+            .request(
+                Method::GET,
+                &format!("v1/dictionary/users/{}", id),
+                None,
+                None,
+            )
+            .await?)
+    }
+
+    pub async fn get_users(
+        &mut self,
+        name: Option<&str>,
+        page_index: Option<&str>,
+        page_size: Option<&str>,
+    ) -> ApiResult {
+        let mut queries = std::vec::Vec::<(&str, String)>::new();
+        if let Some(name) = name {
+            queries.push(("name", String::from(name)));
+        }
+        if let Some(page_index) = page_index {
+            queries.push(("page_index", String::from(page_index)));
+        }
+        if let Some(page_size) = page_size {
+            queries.push(("page_size", String::from(page_size)));
+        }
+        Ok(self
+            .request(
+                Method::GET,
+                "v1/dictionary/users",
+                Some(queries),
+                None,
+            )
+            .await?)
+    }
 }

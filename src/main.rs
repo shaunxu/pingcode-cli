@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate clap;
 
-use clap::{Arg, ArgGroup, SubCommand};
+use clap::{Arg, SubCommand};
 use std::error::Error;
 
 mod args;
@@ -57,6 +57,40 @@ async fn main() -> Result<(), AnyError> {
         .subcommand(
             SubCommand::with_name("test")
                 .about("Test the connective and verify authentication information"),
+        )
+        .subcommand(
+            SubCommand::with_name("dictionary")
+                .about("Manage dictionary infomation (user, role, etc.)")
+                .subcommand(
+                    SubCommand::with_name("user")
+                        .about("Manage users")
+                        .subcommand(
+                            SubCommand::with_name("get")
+                                .about("Get a user by id")
+                                .arg(
+                                    Arg::with_name("id")
+                                        .long("id")
+                                        .takes_value(true)
+                                        .required(true)
+                                        .help("The id of the user will be get"),
+                                )
+                                .arg(args::GeneralArgs::pretty()),
+                        )
+                        .subcommand(
+                            SubCommand::with_name("list")
+                                .about("Get all projects")
+                                .arg(
+                                    Arg::with_name("name")
+                                        .long("name")
+                                        .takes_value(true)
+                                        .required(false)
+                                        .help("The name of the user"),
+                                )
+                                .arg(args::GeneralArgs::page_index())
+                                .arg(args::GeneralArgs::page_size())
+                                .arg(args::GeneralArgs::pretty()),
+                        ),
+                )
         )
         .subcommand(
             SubCommand::with_name("agile")
@@ -159,7 +193,7 @@ async fn main() -> Result<(), AnyError> {
             Ok(pong) => println!("Ok: {}", pong),
             Err(e) => println!("Failed: {}", e),
         }
-    } else if let Some(subcommand) = clap.subcommand_matches("agile") {
+    } else if let Some(subcommand) = clap.subcommand_matches("dictionary") {
         if let Some(subcommand) = subcommand.subcommand_matches("project") {
             if let Some(subcommand) = subcommand.subcommand_matches("get") {
                 let id = String::from(subcommand.value_of("id").unwrap());
@@ -170,6 +204,23 @@ async fn main() -> Result<(), AnyError> {
                     .get_projects(
                         subcommand.value_of("identifier"),
                         subcommand.value_of("type"),
+                        subcommand.value_of("page_index"),
+                        subcommand.value_of("page_size"),
+                    )
+                    .await?;
+                json_printer::JSONPrinter::print_by_arg(res, subcommand);
+            } else {
+                println!("{}", subcommand.usage());
+            }
+        } else if let Some(subcommand) = subcommand.subcommand_matches("user") {
+            if let Some(subcommand) = subcommand.subcommand_matches("get") {
+                let id = String::from(subcommand.value_of("id").unwrap());
+                let res = client.get_user_by_id(&id).await?;
+                json_printer::JSONPrinter::print_by_arg(res, subcommand);
+            } else if let Some(subcommand) = subcommand.subcommand_matches("list") {
+                let res = client
+                    .get_users(
+                        subcommand.value_of("name"),
                         subcommand.value_of("page_index"),
                         subcommand.value_of("page_size"),
                     )
