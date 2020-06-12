@@ -1,3 +1,4 @@
+use clap::ArgMatches;
 use clap::{Arg};
 
 pub struct GeneralArgs {}
@@ -24,5 +25,19 @@ impl GeneralArgs {
             .required(false)
             .takes_value(true)
             .help("Indicates the page size")
+    }
+}
+
+pub struct ArgParser {}
+
+impl ArgParser {
+    pub fn parse_query<'a>(matches: &'a ArgMatches, keys: std::vec::Vec<&'a str>) -> std::vec::Vec<(&'a str, String)> {
+        let mut query = std::vec::Vec::<(&str, String)>::new();
+        for key in keys.iter() {
+            if let Some(value) = matches.value_of(key) {
+                query.push((key, String::from(value)));
+            }
+        }
+        query
     }
 }

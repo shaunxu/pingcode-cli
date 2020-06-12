@@ -21,8 +21,7 @@ impl WTError {
     }
 
     pub fn new_boxed(code: &str, message: &str) -> Box<WTError> {
-        let err = WTError::new(code, message);
-        Box::new(err)
+        Box::new(WTError::new(code, message))
     }
 }
 
@@ -39,40 +38,51 @@ impl std::fmt::Display for WTError {
 impl std::error::Error for WTError {}
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct WTClientHost {
+pub struct WTConfig {
     api_endpoint: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct WTClientCredentials {
+    version: Option<String>,
     client_id: Option<String>,
     client_secret: Option<String>,
     access_token: Option<String>,
     expires_in: Option<i32>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct WTConfig {
-    host: Option<WTClientHost>,
-    credentials: Option<WTClientCredentials>,
-}
-
 impl WTConfig {
-    pub fn load(path: String) -> WTConfig {
+    pub fn new(
+        api_endpoint: Option<String>,
+        version: Option<String>,
+        client_id: Option<String>,
+        client_secret: Option<String>,
+        access_token: Option<String>,
+        expires_in: Option<i32>,
+    ) -> WTConfig {
+        WTConfig {
+            api_endpoint: api_endpoint,
+            version: version,
+            client_id: client_id,
+            client_secret: client_secret,
+            access_token: access_token,
+            expires_in: expires_in,
+        }
+    }
+
+    pub fn load(path: &str) -> WTConfig {
         if let Ok(content) = std::fs::read_to_string(path) {
             let config: WTConfig = toml::from_str(&content).unwrap();
             config
         } else {
             WTConfig {
-                host: Some(WTClientHost {
-                    api_endpoint: Some(String::from("https://open.worktile.com")),
-                }),
-                credentials: None,
+                api_endpoint: Some(String::from("https://open.worktile.com")),
+                version: Some(String::from("1")),
+                client_id: None,
+                client_secret: None,
+                access_token: None,
+                expires_in: None,
             }
         }
     }
 
-    pub fn save(&self, path: &String) -> Result<(), AnyError> {
+    pub fn save(&self, path: &str) -> Result<(), AnyError> {
         let content = toml::to_string_pretty(self).unwrap();
         let mut file = std::fs::OpenOptions::new()
             .read(true)
@@ -85,11 +95,7 @@ impl WTConfig {
     }
 }
 
-pub struct WTClient {
-    client: Client,
-    config_path: String,
-    config: WTConfig,
-}
+pub struct WTClient {}
 
 #[derive(Serialize, Deserialize)]
 struct AuthResponse {
@@ -99,20 +105,11 @@ struct AuthResponse {
 }
 
 impl WTClient {
-    pub fn new(config_path: Option<String>) -> WTClient {
-        let path = match config_path {
-            Some(p) => p,
-            None => String::from(".wt_config"),
-        };
-        WTClient {
-            client: Client::new(),
-            config_path: path.clone(),
-            config: WTConfig::load(path.clone()),
-        }
+    fn get_config_path() -> &'static str {
+        ".wt_config"
     }
 
     async fn request_internal(
-        &self,
         method: Method,
         api_endpoint: &str,
         uri: &str,
@@ -121,7 +118,7 @@ impl WTClient {
         headers: Option<HeaderMap>,
     ) -> Result<serde_json::Value, AnyError> {
         let url = format!("{}/{}", api_endpoint, uri);
-        let mut req = self.client.request(method, &url);
+        let mut req = Client::new().request(method, &url);
         req = match headers {
             Some(headers) => req.headers(headers),
             None => req,
@@ -146,56 +143,56 @@ impl WTClient {
         }
     }
 
-    async fn request(
-        &mut self,
+    pub async fn request(
         method: Method,
-        uri: &str,
+        area: Option<&str>,
+        resource: &str,
+        param: Option<&str>,
         query: Option<std::vec::Vec<(&str, String)>>,
         body: Option<&serde_json::Value>,
     ) -> ApiResult {
-        let api_endpoint = self
-            .config
-            .host
-            .as_ref()
-            .and(self.config.host.as_ref().unwrap().api_endpoint.clone());
-        let credentials = self.config.credentials.as_ref();
-        let client_id = credentials.and(credentials.unwrap().client_id.clone());
-        let client_secret = credentials.and(credentials.unwrap().client_secret.clone());
-        let access_token = credentials.and(credentials.unwrap().access_token.clone());
-        if access_token.is_none() {
-            if client_id.is_none() || client_secret.is_none() || api_endpoint.is_none() {
+        // try load config and process auth if not login
+        let config = WTConfig::load(WTClient::get_config_path());
+        if config.access_token.is_none() {
+            if config.client_id.is_none()
+                || config.client_secret.is_none()
+                || config.api_endpoint.is_none()
+            {
                 return Err(WTError::new_boxed("000000", "Please login first"));
             } else {
-                self.auth(
-                    &client_id.unwrap(),
-                    &client_secret.unwrap(),
-                    &api_endpoint.clone().unwrap(),
+                WTClient::auth(
+                    &config.client_id.unwrap(),
+                    &config.client_secret.unwrap(),
+                    &config.api_endpoint.unwrap(),
+                    &config.version.unwrap(),
                 )
                 .await?;
             }
         }
 
+        // load config again after auth to process the underlying request
+        let config = WTConfig::load(WTClient::get_config_path());
         let mut headers = HeaderMap::new();
         headers.insert(
             "authorization",
-            format!(
-                "Bearer {}",
-                self.config
-                    .credentials
-                    .as_ref()
-                    .unwrap()
-                    .access_token
-                    .as_ref()
-                    .unwrap()
-            )
-            .parse()
-            .unwrap(),
+            format!("Bearer {}", config.access_token.unwrap())
+                .parse()
+                .unwrap(),
         );
         headers.insert("content-type", "application/json".parse().unwrap());
-        self.request_internal(
+        let mut uri = std::path::PathBuf::new();
+        uri.push(&format!("v{}", &config.version.unwrap()));
+        if let Some(area) = area {
+            uri.push(area);
+        }
+        uri.push(resource);
+        if let Some(param) = param {
+            uri.push(param);
+        }
+        WTClient::request_internal(
             method,
-            &api_endpoint.unwrap(),
-            uri,
+            &config.api_endpoint.unwrap(),
+            uri.to_str().unwrap(),
             query,
             body,
             Some(headers),
@@ -204,36 +201,31 @@ impl WTClient {
     }
 
     pub async fn auth(
-        &mut self,
         client_id: &String,
         client_secret: &String,
         api_endpoint: &String,
+        version: &String,
     ) -> Result<(), AnyError> {
         let uri = format!(
-            "v1/auth/token?grant_type=client_credentials&client_id={}&client_secret={}",
-            client_id, client_secret
+            "v{}/auth/token?grant_type=client_credentials&client_id={}&client_secret={}",
+            version, client_id, client_secret
         );
         let res: AuthResponse = serde_json::from_value(
-            self.request_internal(Method::GET, &api_endpoint, &uri, None, None, None)
-                .await?,
+            WTClient::request_internal(Method::GET, &api_endpoint, &uri, None, None, None).await?,
         )?;
-        self.config.host = Some(WTClientHost {
-            api_endpoint: Some(api_endpoint.clone()),
-        });
-        self.config.credentials = Some(WTClientCredentials {
-            client_id: Some(client_id.clone()),
-            client_secret: Some(client_secret.clone()),
-            access_token: Some(res.access_token),
-            expires_in: Some(res.expires_in),
-        });
-        self.config.save(&self.config_path)?;
-        Ok(())
+        let config = WTConfig::new(
+            Some(api_endpoint.clone()),
+            Some(version.clone()),
+            Some(client_id.clone()),
+            Some(client_secret.clone()),
+            Some(res.access_token.clone()),
+            Some(res.expires_in.clone()),
+        );
+        config.save(WTClient::get_config_path())
     }
 
-    pub async fn ping(&mut self) -> Result<String, AnyError> {
-        let res = self
-            .request(Method::GET, "v1/auth/ping", None, None)
-            .await?;
+    pub async fn ping() -> Result<String, AnyError> {
+        let res = WTClient::request(Method::GET, Some("auth"), "ping", None, None, None).await?;
         let res: serde_json::Value = serde_json::from_value(res)?;
         if let serde_json::Value::String(pong) = &res["data"] {
             Ok(pong.clone())
@@ -242,19 +234,11 @@ impl WTClient {
         }
     }
 
-    pub async fn get_project_by_id(&mut self, id: &String) -> ApiResult {
-        Ok(self
-            .request(
-                Method::GET,
-                &format!("v1/agile/projects/{}", id),
-                None,
-                None,
-            )
-            .await?)
+    pub async fn get_project_by_id(id: &String) -> ApiResult {
+        Ok(WTClient::request(Method::GET, Some("agile"), "projects", Some(id), None, None).await?)
     }
 
     pub async fn get_projects(
-        &mut self,
         identifier: Option<&str>,
         project_type: Option<&str>,
         page_index: Option<&str>,
@@ -273,50 +257,15 @@ impl WTClient {
         if let Some(page_size) = page_size {
             queries.push(("page_size", String::from(page_size)));
         }
-        Ok(self
-            .request(
-                Method::GET,
-                "v1/agile/projects",
-                Some(queries),
-                None,
-            )
-            .await?)
+        Ok(WTClient::request(
+            Method::GET,
+            Some("agile"),
+            "projects",
+            None,
+            Some(queries),
+            None,
+        )
+        .await?)
     }
 
-    pub async fn get_user_by_id(&mut self, id: &String) -> ApiResult {
-        Ok(self
-            .request(
-                Method::GET,
-                &format!("v1/dictionary/users/{}", id),
-                None,
-                None,
-            )
-            .await?)
-    }
-
-    pub async fn get_users(
-        &mut self,
-        name: Option<&str>,
-        page_index: Option<&str>,
-        page_size: Option<&str>,
-    ) -> ApiResult {
-        let mut queries = std::vec::Vec::<(&str, String)>::new();
-        if let Some(name) = name {
-            queries.push(("name", String::from(name)));
-        }
-        if let Some(page_index) = page_index {
-            queries.push(("page_index", String::from(page_index)));
-        }
-        if let Some(page_size) = page_size {
-            queries.push(("page_size", String::from(page_size)));
-        }
-        Ok(self
-            .request(
-                Method::GET,
-                "v1/dictionary/users",
-                Some(queries),
-                None,
-            )
-            .await?)
-    }
 }
