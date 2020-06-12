@@ -234,38 +234,4 @@ impl WTClient {
         }
     }
 
-    pub async fn get_project_by_id(id: &String) -> ApiResult {
-        Ok(WTClient::request(Method::GET, Some("agile"), "projects", Some(id), None, None).await?)
-    }
-
-    pub async fn get_projects(
-        identifier: Option<&str>,
-        project_type: Option<&str>,
-        page_index: Option<&str>,
-        page_size: Option<&str>,
-    ) -> ApiResult {
-        let mut queries = std::vec::Vec::<(&str, String)>::new();
-        if let Some(identifier) = identifier {
-            queries.push(("identifier", String::from(identifier)));
-        }
-        if let Some(project_type) = project_type {
-            queries.push(("type", String::from(project_type)));
-        }
-        if let Some(page_index) = page_index {
-            queries.push(("page_index", String::from(page_index)));
-        }
-        if let Some(page_size) = page_size {
-            queries.push(("page_size", String::from(page_size)));
-        }
-        Ok(WTClient::request(
-            Method::GET,
-            Some("agile"),
-            "projects",
-            None,
-            Some(queries),
-            None,
-        )
-        .await?)
-    }
-
 }

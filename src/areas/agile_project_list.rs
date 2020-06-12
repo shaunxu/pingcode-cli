@@ -1,9 +1,9 @@
+use crate::args::ArgParser;
 use crate::args::GeneralArgs;
 use crate::common::op::Op;
 use crate::common::op::OpRequest;
 use clap::Arg;
 use clap::ArgMatches;
-use crate::args::ArgParser;
 
 pub struct ListOp {
     area_name: String,
@@ -33,11 +33,22 @@ impl Op for ListOp {
     }
 
     fn get_description(&self) -> &str {
-        "Get all users"
+        "Get all projects"
     }
 
     fn get_args(&self) -> std::vec::Vec<Arg> {
         vec![
+            Arg::with_name("identifier")
+                .long("identifier")
+                .takes_value(true)
+                .required(false)
+                .help("The identifier of the project"),
+            Arg::with_name("type")
+                .long("type")
+                .takes_value(true)
+                .required(false)
+                .possible_values(&["scrum", "kanban", "bug"])
+                .help("The type of projects"),
             GeneralArgs::page_index(),
             GeneralArgs::page_size(),
             GeneralArgs::pretty(),
@@ -48,7 +59,10 @@ impl Op for ListOp {
         OpRequest {
             method: reqwest::Method::GET,
             param: None,
-            query: Some(ArgParser::parse_query(matches, vec!["page_index", "page_size"])),
+            query: Some(ArgParser::parse_query(
+                matches,
+                vec!["identifier", "type", "page_index", "page_size"],
+            )),
             body: None,
         }
     }

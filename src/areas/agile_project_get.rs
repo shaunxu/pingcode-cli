@@ -1,25 +1,24 @@
-use crate::args::GeneralArgs;
 use crate::common::op::Op;
-use crate::common::op::OpRequest;
-use clap::Arg;
 use clap::ArgMatches;
-use crate::args::ArgParser;
+use clap::Arg;
+use crate::args::GeneralArgs;
+use crate::common::op::OpRequest;
 
-pub struct ListOp {
+pub struct GetOp {
     area_name: String,
     resource_name: String,
 }
 
-impl ListOp {
-    pub fn new(area_name: &str, resource_name: &str) -> ListOp {
-        ListOp {
+impl GetOp {
+    pub fn new(area_name: &str, resource_name: &str) -> GetOp {
+        GetOp {
             area_name: String::from(area_name),
             resource_name: String::from(resource_name),
         }
     }
 }
 
-impl Op for ListOp {
+impl Op for GetOp {
     fn get_area_name(&self) -> &str {
         &self.area_name
     }
@@ -29,17 +28,20 @@ impl Op for ListOp {
     }
 
     fn get_name(&self) -> &str {
-        "list"
+        "get"
     }
 
     fn get_description(&self) -> &str {
-        "Get all users"
+        "Get a project by id"
     }
 
     fn get_args(&self) -> std::vec::Vec<Arg> {
         vec![
-            GeneralArgs::page_index(),
-            GeneralArgs::page_size(),
+            Arg::with_name("id")
+                .long("id")
+                .takes_value(true)
+                .required(true)
+                .help("The id of the project will be get"),
             GeneralArgs::pretty(),
         ]
     }
@@ -47,9 +49,10 @@ impl Op for ListOp {
     fn on_do_op<'a>(&self, matches: &'a ArgMatches) -> OpRequest<'a> {
         OpRequest {
             method: reqwest::Method::GET,
-            param: None,
-            query: Some(ArgParser::parse_query(matches, vec!["page_index", "page_size"])),
+            param: matches.value_of("id"),
+            query: None,
             body: None,
         }
     }
+
 }
