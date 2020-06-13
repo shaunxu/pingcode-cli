@@ -1,4 +1,4 @@
-use crate::areas::dictionary_user::UserResource;
+use crate::areas::dictionary_users::DictionaryUsersResource;
 use crate::common::area::Area;
 use crate::common::resource::Resource;
 
@@ -11,7 +11,7 @@ impl DictionaryArea {
         let mut area = DictionaryArea {
             resources: vec![]
         };
-        let user = UserResource::new(area.get_name());
+        let user = DictionaryUsersResource::new(area.get_name());
         area.resources.push(Box::new(user));
         area
     }

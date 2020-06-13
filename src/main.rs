@@ -36,6 +36,13 @@ async fn main() -> Result<(), AnyError> {
         .template(CLAP_TEMPLATE)
         .help_message("Help")
         .version_message("Version");
+    app = app.arg(
+        Arg::with_name("pretty")
+            .long("pretty")
+            .required(false)
+            .global(true)
+            .help("Indicates if the output json result in print pretty format or compact format"),
+    );
     app = app.subcommand(
         SubCommand::with_name("login")
             .about("Login Worktile REST API with client id and client secret")

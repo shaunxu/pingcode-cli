@@ -6,7 +6,7 @@ pub struct OpRequest<'a> {
     pub method: reqwest::Method,
     pub param: Option<&'a str>,
     pub query: Option<std::vec::Vec<(&'a str, String)>>,
-    pub body: Option<&'a serde_json::Value>,
+    pub body: Option<serde_json::Value>,
 }
 
 pub trait Op {
@@ -44,7 +44,7 @@ pub trait Op {
             self.get_resource_name(),
             req.param,
             req.query,
-            req.body,
+            req.body.as_ref(),
         );
         let res = futures::executor::block_on(fut).unwrap();
         JSONPrinter::print_by_arg(res, matches);

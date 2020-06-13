@@ -1,9 +1,11 @@
 pub mod dictionary;
-pub mod dictionary_user;
-pub mod dictionary_user_get;
-pub mod dictionary_user_list;
+pub mod dictionary_users;
+pub mod dictionary_users_get;
+pub mod dictionary_users_list;
 
 pub mod agile;
-pub mod agile_project;
-pub mod agile_project_get;
-pub mod agile_project_list;
+pub mod agile_projects;
+pub mod agile_projects_get;
+pub mod agile_projects_list;
+pub mod agile_epics;
+pub mod agile_epics_create;

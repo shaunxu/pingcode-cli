@@ -1,6 +1,7 @@
 use crate::common::area::Area;
 use crate::common::resource::Resource;
-use crate::areas::agile_project::ProjectResource;
+use crate::areas::agile_projects::AgileProjectsResource;
+use crate::areas::agile_epics::AgileEpicsResource;
 
 pub struct AgileArea {
     resources: std::vec::Vec<Box<dyn Resource>>,
@@ -11,8 +12,8 @@ impl AgileArea {
         let mut area = AgileArea {
             resources: vec![]
         };
-        let project = ProjectResource::new(area.get_name());
-        area.resources.push(Box::new(project));
+        area.resources.push(Box::new(AgileProjectsResource::new(area.get_name())));
+        area.resources.push(Box::new(AgileEpicsResource::new(area.get_name())));
         area
     }
 }

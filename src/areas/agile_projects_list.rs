@@ -5,21 +5,21 @@ use crate::common::op::OpRequest;
 use clap::Arg;
 use clap::ArgMatches;
 
-pub struct ListOp {
+pub struct AgileProjectsListOp {
     area_name: String,
     resource_name: String,
 }
 
-impl ListOp {
-    pub fn new(area_name: &str, resource_name: &str) -> ListOp {
-        ListOp {
+impl AgileProjectsListOp {
+    pub fn new(area_name: &str, resource_name: &str) -> AgileProjectsListOp {
+        AgileProjectsListOp {
             area_name: String::from(area_name),
             resource_name: String::from(resource_name),
         }
     }
 }
 
-impl Op for ListOp {
+impl Op for AgileProjectsListOp {
     fn get_area_name(&self) -> &str {
         &self.area_name
     }
@@ -51,7 +51,6 @@ impl Op for ListOp {
                 .help("The type of projects"),
             GeneralArgs::page_index(),
             GeneralArgs::page_size(),
-            GeneralArgs::pretty(),
         ]
     }
 
