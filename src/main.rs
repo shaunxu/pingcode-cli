@@ -13,6 +13,7 @@ mod args;
 mod json_printer;
 mod wt_client;
 use wt_client::WTClient;
+mod installer;
 
 type AnyError = Box<dyn Error>;
 
@@ -86,9 +87,13 @@ async fn main() -> Result<(), AnyError> {
             .about("Test the connective and verify authentication information"),
     );
 
-    for area in areas.iter() {
-        app = app.subcommand(area.to_subcommand());
-    }
+    // for area in areas.iter() {
+    //     app = app.subcommand(area.to_subcommand());
+    // }
+
+    let area_arr = installer::Installer::load(None)?;
+    let cmds = installer::Installer::generate_subcommands(&area_arr);
+    app = app.subcommands(cmds);
 
     let clap = app.get_matches();
 

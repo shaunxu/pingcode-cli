@@ -1,0 +1,87 @@
+[
+    {
+        "name": "agile",
+        "description": "Manage your agile projects and workitems",
+        "resources": [
+            {
+                "name": "projects",
+                "description": "Manage your agile projects",
+                "ops": [
+                    {
+                        "name": "get",
+                        "description": "Get a project by id",
+                        "args": [
+                            {
+                                "name": "id",
+                                "take_value": true,
+                                "required": true,
+                                "description": "The id of the project will be get"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "list",
+                        "description": "Get all projects",
+                        "args": [
+                            {
+                                "name": "identifier",
+                                "take_value": true,
+                                "description": "The identifier of the project"
+                            },
+                            {
+                                "name": "type",
+                                "take_value": true,
+                                "possible_values": [
+                                    "scrum",
+                                    "kanban",
+                                    "bug"
+                                ],
+                                "description": "The identifier of the project"
+                            },
+                            {
+                                "name": "page_index"
+                            },
+                            {
+                                "name": "page_size"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "epics",
+                "description": "Manage your epics in an agile project",
+                "ops": [
+                    {
+                        "name": "create",
+                        "description": "Create a new epic",
+                        "args": []
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "directory",
+        "route": "dictionary",
+        "description": "Manage your enterprise directory infomation (user, role, etc.)",
+        "resources": [
+            {
+                "name": "users",
+                "description": "Manage users",
+                "ops": [
+                    {
+                        "name": "get",
+                        "description": "Get a user by id",
+                        "args": []
+                    },
+                    {
+                        "name": "list",
+                        "description": "Get all users",
+                        "args": []
+                    }
+                ]
+            }
+        ]
+    }
+]
