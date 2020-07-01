@@ -1,61 +1,6 @@
 use clap::Arg;
 use clap::ArgMatches;
 
-pub struct GeneralArgs {}
-
-impl GeneralArgs {
-    pub fn page_index<'a, 'b>() -> Arg<'a, 'b> {
-        Arg::with_name("page_index")
-            .long("page-index")
-            .short("p")
-            .required(false)
-            .takes_value(true)
-            .help("Indicates the page index (start from 0)")
-    }
-
-    pub fn page_size<'a, 'b>() -> Arg<'a, 'b> {
-        Arg::with_name("page_size")
-            .long("page-size")
-            .short("s")
-            .required(false)
-            .takes_value(true)
-            .help("Indicates the page size")
-    }
-
-    pub fn content<'a, 'b>() -> Arg<'a, 'b> {
-        Arg::with_name("content")
-            .long("content")
-            .short("x")
-            .required(true)
-            .takes_value(true)
-            .conflicts_with("in")
-            .help("Content to be created or updated")
-    }
-
-    pub fn input<'a, 'b>() -> Arg<'a, 'b> {
-        Arg::with_name("in")
-            .long("in")
-            .short("i")
-            .required(true)
-            .takes_value(true)
-            .conflicts_with("content")
-            .help("Content to be created or updated")
-    }
-
-    pub fn content_and_input<'a, 'b>() -> std::vec::Vec<Arg<'a, 'b>> {
-        vec![GeneralArgs::content(), GeneralArgs::input()]
-    }
-
-    // pub fn multiple<'a, 'b>() -> Arg<'a, 'b> {
-    //     Arg::with_name("multiple")
-    //         .long("multiple")
-    //         .short("m")
-    //         .required(false)
-    //         .takes_value(false)
-    //         .help("Indicates the content or input contains multiple value which should be performed in parallel")
-    // }
-}
-
 pub struct ArgParser {}
 
 impl ArgParser {
@@ -112,7 +57,7 @@ impl BuildInArgs {
             .required(true)
             .takes_value(true)
             .conflicts_with("in")
-            .help("Content to be created or updated")
+            .help("JSON-formated string for content to be created or updated")
     }
 
     fn input<'a, 'b>() -> Arg<'a, 'b> {
@@ -122,7 +67,7 @@ impl BuildInArgs {
             .required(true)
             .takes_value(true)
             .conflicts_with("content")
-            .help("Content to be created or updated")
+            .help("Input file for content to be created or updated")
     }
 
     // fn multiple<'a, 'b>() -> Arg<'a, 'b> {

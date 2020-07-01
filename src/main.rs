@@ -4,16 +4,11 @@ extern crate clap;
 use clap::{Arg, SubCommand};
 use std::error::Error;
 
-mod areas;
-mod common;
-
-use common::area::Area;
-
 mod args;
-mod json_printer;
-mod wt_client;
-use wt_client::WTClient;
 mod installer;
+mod json_printer;
+mod op_executors;
+mod wt_client;
 
 type AnyError = Box<dyn Error>;
 
@@ -28,11 +23,6 @@ USAGE:
 
 #[tokio::main]
 async fn main() -> Result<(), AnyError> {
-    let areas: std::vec::Vec<Box<dyn Area>> = vec![
-        Box::new(areas::dictionary::DictionaryArea::new()),
-        Box::new(areas::agile::AgileArea::new()),
-    ];
-
     let mut app = app_from_crate!()
         .template(CLAP_TEMPLATE)
         .help_message("Help")
@@ -87,14 +77,11 @@ async fn main() -> Result<(), AnyError> {
             .about("Test the connective and verify authentication information"),
     );
 
-    // for area in areas.iter() {
-    //     app = app.subcommand(area.to_subcommand());
-    // }
+    let areas = installer::Installer::load(None)?;
+    let commands = installer::Installer::generate_subcommands(&areas);
+    let executors = op_executors::OpExecutors::initialize();
 
-    let area_arr = installer::Installer::load(None)?;
-    let cmds = installer::Installer::generate_subcommands(&area_arr);
-    app = app.subcommands(cmds);
-
+    app = app.subcommands(commands);
     let clap = app.get_matches();
 
     if let Some(subcommand) = clap.subcommand_matches("login") {
@@ -102,7 +89,7 @@ async fn main() -> Result<(), AnyError> {
         let client_secret = String::from(subcommand.value_of("client_secret").unwrap());
         let api_endpoint = String::from(subcommand.value_of("api_endpoint").unwrap());
         let version = String::from(subcommand.value_of("version").unwrap());
-        match WTClient::auth(&client_id, &client_secret, &api_endpoint, &version).await {
+        match wt_client::WTClient::auth(&client_id, &client_secret, &api_endpoint, &version).await {
             Ok(()) => println!("Login successful."),
             Err(e) => println!("Failed: {}", e),
         }
@@ -110,7 +97,7 @@ async fn main() -> Result<(), AnyError> {
 
     if let Some(_) = clap.subcommand_matches("test") {
         print!("Connecting ... ");
-        let res = WTClient::ping().await;
+        let res = wt_client::WTClient::ping().await;
         match res {
             Ok(pong) => println!("Ok: {}", pong),
             Err(e) => println!("Failed: {}", e),
@@ -118,7 +105,7 @@ async fn main() -> Result<(), AnyError> {
     }
 
     for area in areas.iter() {
-        area.match_subcommand(&clap);
+        area.match_subcommand(&clap, &executors);
     }
 
     Ok(())

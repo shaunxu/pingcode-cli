@@ -55,7 +55,11 @@
                     {
                         "name": "create",
                         "description": "Create a new epic",
-                        "args": []
+                        "args": [
+                            {
+                                "name": "content_and_input"
+                            }
+                        ]
                     }
                 ]
             }
@@ -63,7 +67,6 @@
     },
     {
         "name": "directory",
-        "route": "dictionary",
         "description": "Manage your enterprise directory infomation (user, role, etc.)",
         "resources": [
             {

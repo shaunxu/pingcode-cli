@@ -1,5 +1,7 @@
 use crate::args;
+use crate::op_executors::OpExecutors;
 use crate::AnyError;
+use clap::ArgMatches;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -20,6 +22,52 @@ pub struct Op {
     args: std::vec::Vec<Arg>,
 }
 
+#[derive(Debug)]
+pub struct OpContext {
+    pub key: String,
+    pub area_route: String,
+    pub resource_route: String,
+}
+
+impl OpContext {
+    pub fn from_area(area: &Area) -> OpContext {
+        OpContext {
+            key: format!("{}", area.name),
+            area_route: area.get_route(),
+            resource_route: String::default(),
+        }
+    }
+
+    pub fn assign_resource(&self, resource: &Resource) -> OpContext {
+        OpContext {
+            key: format!("{}_{}", self.key, resource.name),
+            area_route: self.area_route.clone(),
+            resource_route: resource.get_route(),
+        }
+    }
+
+    pub fn assign_op(&self, op: &Op) -> OpContext {
+        OpContext {
+            key: format!("{}_{}", self.key, op.name),
+            area_route: self.area_route.clone(),
+            resource_route: self.resource_route.clone(),
+        }
+    }
+}
+
+impl Op {
+    pub fn match_subcommand(
+        &self,
+        matches: &ArgMatches,
+        ctx: OpContext,
+        op_executors: &OpExecutors,
+    ) -> () {
+        if let Some(subcommand) = matches.subcommand_matches(&self.name) {
+            op_executors.execute(&ctx.assign_op(self), subcommand)
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Resource {
     name: String,
@@ -28,12 +76,45 @@ pub struct Resource {
     ops: std::vec::Vec<Op>,
 }
 
+impl Resource {
+    pub fn get_route(&self) -> String {
+        self.route.clone().unwrap_or(self.name.clone())
+    }
+
+    pub fn match_subcommand(
+        &self,
+        matches: &ArgMatches,
+        ctx: OpContext,
+        op_executors: &OpExecutors,
+    ) -> () {
+        if let Some(subcommand) = matches.subcommand_matches(&self.name) {
+            for op in self.ops.iter() {
+                op.match_subcommand(subcommand, ctx.assign_resource(&self), op_executors);
+            }
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Area {
     name: String,
     description: String,
     route: Option<String>,
     resources: std::vec::Vec<Resource>,
+}
+
+impl Area {
+    pub fn get_route(&self) -> String {
+        self.route.clone().unwrap_or(self.name.clone())
+    }
+
+    pub fn match_subcommand(&self, matches: &ArgMatches, op_executors: &OpExecutors) -> () {
+        if let Some(subcommand) = matches.subcommand_matches(&self.name) {
+            for resource in self.resources.iter() {
+                resource.match_subcommand(subcommand, OpContext::from_area(self), op_executors);
+            }
+        }
+    }
 }
 
 pub struct Installer {}
@@ -63,7 +144,7 @@ impl Installer {
                         if build_in_args.len() > 0 {
                             op_subcommand = op_subcommand.args(&build_in_args);
                         } else {
-                            let mut ca = clap::Arg::with_name(&arg.name);
+                            let mut ca = clap::Arg::with_name(&arg.name).long(&arg.name);
                             if let Some(takes_value) = arg.take_value {
                                 ca = ca.takes_value(takes_value);
                             }
