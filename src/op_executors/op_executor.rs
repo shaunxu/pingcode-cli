@@ -1,4 +1,4 @@
-use crate::installer::OpContext;
+use crate::configure::OpContext;
 use crate::json_printer;
 use crate::wt_client::WTClient;
 use clap::ArgMatches;

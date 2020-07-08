@@ -1,7 +1,7 @@
 pub mod agile_projects_list;
 pub mod op_executor;
 
-use crate::installer::OpContext;
+use crate::configure::OpContext;
 use clap::ArgMatches;
 
 pub struct OpExecutors {

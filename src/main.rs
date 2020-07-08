@@ -5,7 +5,7 @@ use clap::{Arg, SubCommand};
 use std::error::Error;
 
 mod args;
-mod installer;
+mod configure;
 mod json_printer;
 mod op_executors;
 mod wt_client;
@@ -77,8 +77,8 @@ async fn main() -> Result<(), AnyError> {
             .about("Test the connective and verify authentication information"),
     );
 
-    let areas = installer::Installer::load(None)?;
-    let commands = installer::Installer::generate_subcommands(&areas);
+    let areas = configure::Configure::load(None)?;
+    let commands = configure::Configure::generate_subcommands(&areas);
     let executors = op_executors::OpExecutors::initialize();
 
     app = app.subcommands(commands);

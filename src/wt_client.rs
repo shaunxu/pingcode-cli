@@ -1,7 +1,8 @@
 use super::AnyError;
 use reqwest::header::HeaderMap;
 use reqwest::{Client, Method};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 use std::io::Write;
 
 type ApiResult = Result<serde_json::Value, AnyError>;
@@ -38,7 +39,7 @@ impl std::fmt::Display for WTError {
 impl std::error::Error for WTError {}
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct WTConfig {
+pub struct WTClientConfig {
     api_endpoint: Option<String>,
     version: Option<String>,
     client_id: Option<String>,
@@ -47,7 +48,7 @@ pub struct WTConfig {
     expires_in: Option<i32>,
 }
 
-impl WTConfig {
+impl WTClientConfig {
     pub fn new(
         api_endpoint: Option<String>,
         version: Option<String>,
@@ -55,8 +56,8 @@ impl WTConfig {
         client_secret: Option<String>,
         access_token: Option<String>,
         expires_in: Option<i32>,
-    ) -> WTConfig {
-        WTConfig {
+    ) -> WTClientConfig {
+        WTClientConfig {
             api_endpoint: api_endpoint,
             version: version,
             client_id: client_id,
@@ -66,12 +67,12 @@ impl WTConfig {
         }
     }
 
-    pub fn load(path: &str) -> WTConfig {
+    pub fn load(path: &str) -> WTClientConfig {
         if let Ok(content) = std::fs::read_to_string(path) {
-            let config: WTConfig = toml::from_str(&content).unwrap();
+            let config: WTClientConfig = serde_json::from_str(&content).unwrap();
             config
         } else {
-            WTConfig {
+            WTClientConfig {
                 api_endpoint: Some(String::from("https://open.worktile.com")),
                 version: Some(String::from("1")),
                 client_id: None,
@@ -83,7 +84,7 @@ impl WTConfig {
     }
 
     pub fn save(&self, path: &str) -> Result<(), AnyError> {
-        let content = toml::to_string_pretty(self).unwrap();
+        let content = serde_json::to_string_pretty(self).unwrap();
         let mut file = std::fs::OpenOptions::new()
             .read(true)
             .write(true)
@@ -105,8 +106,8 @@ struct AuthResponse {
 }
 
 impl WTClient {
-    fn get_config_path() -> &'static str {
-        ".wt_config"
+    fn get_client_path() -> &'static str {
+        ".wt_client.json"
     }
 
     async fn request_internal(
@@ -152,7 +153,7 @@ impl WTClient {
         body: Option<&serde_json::Value>,
     ) -> ApiResult {
         // try load config and process auth if not login
-        let config = WTConfig::load(WTClient::get_config_path());
+        let config = WTClientConfig::load(WTClient::get_client_path());
         if config.access_token.is_none() {
             if config.client_id.is_none()
                 || config.client_secret.is_none()
@@ -171,7 +172,7 @@ impl WTClient {
         }
 
         // load config again after auth to process the underlying request
-        let config = WTConfig::load(WTClient::get_config_path());
+        let config = WTClientConfig::load(WTClient::get_client_path());
         let mut headers = HeaderMap::new();
         headers.insert(
             "authorization",
@@ -213,7 +214,7 @@ impl WTClient {
         let res: AuthResponse = serde_json::from_value(
             WTClient::request_internal(Method::GET, &api_endpoint, &uri, None, None, None).await?,
         )?;
-        let config = WTConfig::new(
+        let config = WTClientConfig::new(
             Some(api_endpoint.clone()),
             Some(version.clone()),
             Some(client_id.clone()),
@@ -221,7 +222,7 @@ impl WTClient {
             Some(res.access_token.clone()),
             Some(res.expires_in.clone()),
         );
-        config.save(WTClient::get_config_path())
+        config.save(WTClient::get_client_path())
     }
 
     pub async fn ping() -> Result<String, AnyError> {
