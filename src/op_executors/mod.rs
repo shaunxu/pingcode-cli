@@ -2,6 +2,7 @@ pub mod agile_projects_get;
 pub mod agile_projects_list;
 pub mod directory_users_get;
 pub mod directory_users_list;
+pub mod agile_epics_create;
 pub mod op_executor;
 
 use crate::AnyError;
@@ -32,6 +33,10 @@ impl OpExecutors {
         es.insert(
             String::from("directory_users_list"),
             Box::new(directory_users_list::DirectoryUsersListOpExecutor {}),
+        );
+        es.insert(
+            String::from("agile_epics_create"),
+            Box::new(agile_epics_create::AgileEpicCreateOpExecutor {}),
         );
         OpExecutors { executors: es }
     }

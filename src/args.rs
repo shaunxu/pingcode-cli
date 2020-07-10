@@ -1,5 +1,7 @@
+use crate::AnyError;
 use clap::Arg;
 use clap::ArgMatches;
+use crate::wt_error::WTError;
 
 pub struct ArgParser {}
 
@@ -25,6 +27,17 @@ impl ArgParser {
         } else {
             // never happened since either "--content" and "--in" must be specified
             None
+        }
+    }
+
+    pub fn parse_content_to_json(matches: &ArgMatches) -> Result<Option<serde_json::Value>, AnyError> {
+        if let Some(raw) = ArgParser::parse_content(matches) {
+            match serde_json::from_str(&raw) {
+                Ok(json) => Ok(Some(json)),
+                Err(e) => Err(WTError::new_boxed("000000", &format!("Failed to parse content in JSON format. {}", e)))
+            }
+        } else {
+            Ok(Some(serde_json::Value::default()))
         }
     }
 }
@@ -67,7 +80,7 @@ impl BuildInArgs {
             .required(true)
             .takes_value(true)
             .conflicts_with("content")
-            .help("Input file for content to be created or updated")
+            .help("Input file for JSON-formated content to be created or updated")
     }
 
     // fn multiple<'a, 'b>() -> Arg<'a, 'b> {
