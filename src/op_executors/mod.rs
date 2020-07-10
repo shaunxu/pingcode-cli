@@ -1,5 +1,7 @@
 pub mod agile_projects_get;
 pub mod agile_projects_list;
+pub mod directory_users_get;
+pub mod directory_users_list;
 pub mod op_executor;
 
 use crate::AnyError;
@@ -22,6 +24,14 @@ impl OpExecutors {
         es.insert(
             String::from("agile_projects_get"),
             Box::new(agile_projects_get::AgileProjectGetOpExecutor {}),
+        );
+        es.insert(
+            String::from("directory_users_get"),
+            Box::new(directory_users_get::DirectoryUsersGetOpExecutor {}),
+        );
+        es.insert(
+            String::from("directory_users_list"),
+            Box::new(directory_users_list::DirectoryUsersListOpExecutor {}),
         );
         OpExecutors { executors: es }
     }

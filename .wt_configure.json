@@ -76,12 +76,31 @@
                     {
                         "name": "get",
                         "description": "Get a user by id",
-                        "args": []
+                        "args": [
+                            {
+                                "name": "id",
+                                "take_value": true,
+                                "required": true,
+                                "description": "The id of the project will be get"
+                            }
+                        ]
                     },
                     {
                         "name": "list",
                         "description": "Get all users",
-                        "args": []
+                        "args": [
+                            {
+                                "name": "name",
+                                "take_value": true,
+                                "description": "Login name of a user"
+                            },
+                            {
+                                "name": "page_index"
+                            },
+                            {
+                                "name": "page_size"
+                            }
+                        ]
                     }
                 ]
             }
