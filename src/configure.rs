@@ -61,9 +61,11 @@ impl Op {
         matches: &ArgMatches,
         ctx: OpContext,
         op_executors: &OpExecutors,
-    ) -> () {
+    ) -> Result<(), AnyError> {
         if let Some(subcommand) = matches.subcommand_matches(&self.name) {
             op_executors.execute(&ctx.assign_op(self), subcommand)
+        } else {
+            Ok(())
         }
     }
 }
@@ -86,12 +88,13 @@ impl Resource {
         matches: &ArgMatches,
         ctx: OpContext,
         op_executors: &OpExecutors,
-    ) -> () {
+    ) -> Result<(), AnyError> {
         if let Some(subcommand) = matches.subcommand_matches(&self.name) {
             for op in self.ops.iter() {
-                op.match_subcommand(subcommand, ctx.assign_resource(&self), op_executors);
+                op.match_subcommand(subcommand, ctx.assign_resource(&self), op_executors)?
             }
         }
+        Ok(())
     }
 }
 
@@ -108,12 +111,13 @@ impl Area {
         self.route.clone().unwrap_or(self.name.clone())
     }
 
-    pub fn match_subcommand(&self, matches: &ArgMatches, op_executors: &OpExecutors) -> () {
+    pub fn match_subcommand(&self, matches: &ArgMatches, op_executors: &OpExecutors) -> Result<(), AnyError> {
         if let Some(subcommand) = matches.subcommand_matches(&self.name) {
             for resource in self.resources.iter() {
-                resource.match_subcommand(subcommand, OpContext::from_area(self), op_executors);
+                resource.match_subcommand(subcommand, OpContext::from_area(self), op_executors)?
             }
         }
+        Ok(())
     }
 }
 

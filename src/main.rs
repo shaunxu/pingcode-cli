@@ -9,6 +9,7 @@ mod configure;
 mod json_printer;
 mod op_executors;
 mod wt_client;
+mod wt_error;
 
 type AnyError = Box<dyn Error>;
 
@@ -105,7 +106,10 @@ async fn main() -> Result<(), AnyError> {
     }
 
     for area in areas.iter() {
-        area.match_subcommand(&clap, &executors);
+        match area.match_subcommand(&clap, &executors) {
+            Err(e) => println!("{:#?}", e),
+            Ok(_) => {}
+        }
     }
 
     Ok(())

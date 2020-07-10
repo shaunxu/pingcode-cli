@@ -1,3 +1,4 @@
+use crate::AnyError;
 use crate::configure::OpContext;
 use crate::json_printer;
 use crate::wt_client::WTClient;
@@ -13,7 +14,7 @@ pub struct OpRequest<'a> {
 pub trait OpExecutor {
     fn on_execute<'a>(&self, matches: &'a ArgMatches) -> OpRequest<'a>;
 
-    fn execute(&self, matches: &ArgMatches, context: &OpContext) -> () {
+    fn execute(&self, matches: &ArgMatches, context: &OpContext) -> Result<(), AnyError> {
         let req = self.on_execute(matches);
         let fut = WTClient::request(
             req.method,
@@ -23,7 +24,7 @@ pub trait OpExecutor {
             req.query,
             req.body.as_ref(),
         );
-        let res = futures::executor::block_on(fut).unwrap();
-        json_printer::JSONPrinter::print_by_arg(res, matches);
+        let res = futures::executor::block_on(fut)?;
+        Ok(json_printer::JSONPrinter::print_by_arg(res, matches))
     }
 }
