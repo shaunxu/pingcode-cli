@@ -62,6 +62,36 @@
                         ]
                     }
                 ]
+            },
+            {
+                "name": "features",
+                "description": "Manage your features under an epic in an agile project",
+                "ops": [
+                    {
+                        "name": "create",
+                        "description": "Create a new feature",
+                        "args": [
+                            {
+                                "name": "content_and_input"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "stories",
+                "description": "Manage your user stories under a feature in an agile project",
+                "ops": [
+                    {
+                        "name": "create",
+                        "description": "Create a new user story",
+                        "args": [
+                            {
+                                "name": "content_and_input"
+                            }
+                        ]
+                    }
+                ]
             }
         ]
     },
