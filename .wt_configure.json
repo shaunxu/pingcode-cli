@@ -92,6 +92,36 @@
                         ]
                     }
                 ]
+            },
+            {
+                "name": "tasks",
+                "description": "Manage your tasks under a user story in an agile project",
+                "ops": [
+                    {
+                        "name": "create",
+                        "description": "Create a new task",
+                        "args": [
+                            {
+                                "name": "content_and_input"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "bugs",
+                "description": "Manage your bugs under a user story in an agile project",
+                "ops": [
+                    {
+                        "name": "create",
+                        "description": "Create a new bug",
+                        "args": [
+                            {
+                                "name": "content_and_input"
+                            }
+                        ]
+                    }
+                ]
             }
         ]
     },
