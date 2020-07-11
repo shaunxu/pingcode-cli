@@ -14,4 +14,4 @@ Cargo.lock
 
 /target
 
-.wt_config
+.pc_client.json

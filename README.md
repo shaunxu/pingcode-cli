@@ -1,4 +1,4 @@
-![build](https://github.com/shaunxu/worktile-cli/workflows/build/badge.svg)
+![build](https://github.com/shaunxu/pingcode-cli/workflows/build/badge.svg)
 
-# worktile-cli
-Command Line Interface for Worktile
+# pingcode-cli
+Command Line Interface for PingCode
