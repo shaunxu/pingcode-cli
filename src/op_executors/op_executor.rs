@@ -7,15 +7,15 @@ use clap::ArgMatches;
 pub struct OpRequest<'a> {
     pub method: reqwest::Method,
     pub param: Option<&'a str>,
-    pub query: Option<std::vec::Vec<(&'a str, String)>>,
+    pub query: Option<std::vec::Vec<(String, String)>>,
     pub body: Option<serde_json::Value>,
 }
 
 pub trait OpExecutor {
-    fn on_execute<'a>(&self, matches: &'a ArgMatches) -> Result<OpRequest<'a>, AnyError>;
+    fn on_execute<'a>(&self, matches: &'a ArgMatches, context: &OpContext) -> Result<OpRequest<'a>, AnyError>;
 
     fn execute(&self, matches: &ArgMatches, context: &OpContext) -> Result<(), AnyError> {
-        let req = self.on_execute(matches)?;
+        let req = self.on_execute(matches, context)?;
         let fut = WTClient::request(
             req.method,
             Some(&context.area_route),

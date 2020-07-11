@@ -1,19 +1,19 @@
 use crate::configure::OpContext;
-use crate::AnyError;
+use crate::args::ArgParser;
 use crate::op_executors::op_executor::OpExecutor;
 use crate::op_executors::op_executor::OpRequest;
+use crate::AnyError;
 use clap::ArgMatches;
-use crate::args::ArgParser;
 
-pub struct AgileBugsCreateOpExecutor {}
+pub struct AgileWorkitemsListOpExecutor {}
 
-impl OpExecutor for AgileBugsCreateOpExecutor {
+impl OpExecutor for AgileWorkitemsListOpExecutor {
     fn on_execute<'a>(&self, matches: &'a ArgMatches, context: &OpContext) -> Result<OpRequest<'a>, AnyError> {
         Ok(OpRequest {
-            method: reqwest::Method::POST,
+            method: reqwest::Method::GET,
             param: None,
-            query: None,
-            body: ArgParser::parse_content_to_json(matches)?,
+            query: Some(ArgParser::parse_query_from_args(matches, context)),
+            body: None,
         })
     }
 }

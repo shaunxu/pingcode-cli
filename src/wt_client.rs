@@ -84,7 +84,7 @@ impl WTClient {
         method: Method,
         api_endpoint: &str,
         uri: &str,
-        query: Option<std::vec::Vec<(&str, String)>>,
+        query: Option<std::vec::Vec<(String, String)>>,
         body: Option<&serde_json::Value>,
         headers: Option<HeaderMap>,
     ) -> Result<serde_json::Value, AnyError> {
@@ -119,7 +119,7 @@ impl WTClient {
         area: Option<&str>,
         resource: &str,
         param: Option<&str>,
-        query: Option<std::vec::Vec<(&str, String)>>,
+        query: Option<std::vec::Vec<(String, String)>>,
         body: Option<&serde_json::Value>,
     ) -> ApiResult {
         // try load config and process auth if not login

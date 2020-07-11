@@ -27,6 +27,7 @@ pub struct OpContext {
     pub key: String,
     pub area_route: String,
     pub resource_route: String,
+    pub arg_names: std::vec::Vec<String>,
 }
 
 impl OpContext {
@@ -35,6 +36,7 @@ impl OpContext {
             key: format!("{}", area.name),
             area_route: area.get_route(),
             resource_route: String::default(),
+            arg_names: vec![],
         }
     }
 
@@ -43,15 +45,21 @@ impl OpContext {
             key: format!("{}_{}", self.key, resource.name),
             area_route: self.area_route.clone(),
             resource_route: resource.get_route(),
+            arg_names: vec![],
         }
     }
 
     pub fn assign_op(&self, op: &Op) -> OpContext {
-        OpContext {
+        let mut ctx = OpContext {
             key: format!("{}_{}", self.key, op.name),
             area_route: self.area_route.clone(),
             resource_route: self.resource_route.clone(),
+            arg_names: vec![],
+        };
+        for arg in op.args.iter() {
+            ctx.arg_names.push(arg.name.clone());
         }
+        ctx
     }
 }
 
@@ -111,7 +119,11 @@ impl Area {
         self.route.clone().unwrap_or(self.name.clone())
     }
 
-    pub fn match_subcommand(&self, matches: &ArgMatches, op_executors: &OpExecutors) -> Result<(), AnyError> {
+    pub fn match_subcommand(
+        &self,
+        matches: &ArgMatches,
+        op_executors: &OpExecutors,
+    ) -> Result<(), AnyError> {
         if let Some(subcommand) = matches.subcommand_matches(&self.name) {
             for resource in self.resources.iter() {
                 resource.match_subcommand(subcommand, OpContext::from_area(self), op_executors)?

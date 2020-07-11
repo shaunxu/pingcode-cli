@@ -1,22 +1,30 @@
+use crate::configure::OpContext;
+use crate::wt_error::WTError;
 use crate::AnyError;
 use clap::Arg;
 use clap::ArgMatches;
-use crate::wt_error::WTError;
 
 pub struct ArgParser {}
 
 impl ArgParser {
-    pub fn parse_query<'a>(
-        matches: &'a ArgMatches,
-        keys: std::vec::Vec<&'a str>,
-    ) -> std::vec::Vec<(&'a str, String)> {
-        let mut query = std::vec::Vec::<(&str, String)>::new();
+    pub fn parse_query(
+        matches: &ArgMatches,
+        keys: std::vec::Vec<String>,
+    ) -> std::vec::Vec<(String, String)> {
+        let mut query = std::vec::Vec::<(String, String)>::new();
         for key in keys.iter() {
             if let Some(value) = matches.value_of(key) {
-                query.push((key, String::from(value)));
+                query.push((key.replace("-", "_"), String::from(value)));
             }
         }
         query
+    }
+
+    pub fn parse_query_from_args(
+        matches: &ArgMatches,
+        ctx: &OpContext,
+    ) -> std::vec::Vec<(String, String)> {
+        ArgParser::parse_query(matches, ctx.arg_names.clone())
     }
 
     pub fn parse_content(matches: &ArgMatches) -> Option<String> {
@@ -30,11 +38,16 @@ impl ArgParser {
         }
     }
 
-    pub fn parse_content_to_json(matches: &ArgMatches) -> Result<Option<serde_json::Value>, AnyError> {
+    pub fn parse_content_to_json(
+        matches: &ArgMatches,
+    ) -> Result<Option<serde_json::Value>, AnyError> {
         if let Some(raw) = ArgParser::parse_content(matches) {
             match serde_json::from_str(&raw) {
                 Ok(json) => Ok(Some(json)),
-                Err(e) => Err(WTError::new_boxed("000000", &format!("Failed to parse content in JSON format. {}", e)))
+                Err(e) => Err(WTError::new_boxed(
+                    "000000",
+                    &format!("Failed to parse content in JSON format. {}", e),
+                )),
             }
         } else {
             Ok(Some(serde_json::Value::default()))
@@ -46,7 +59,7 @@ pub struct BuildInArgs {}
 
 impl BuildInArgs {
     fn page_index<'a, 'b>() -> Arg<'a, 'b> {
-        Arg::with_name("page_index")
+        Arg::with_name("page-index")
             .long("page-index")
             .short("p")
             .required(false)
@@ -55,7 +68,7 @@ impl BuildInArgs {
     }
 
     fn page_size<'a, 'b>() -> Arg<'a, 'b> {
-        Arg::with_name("page_size")
+        Arg::with_name("page-size")
             .long("page-size")
             .short("s")
             .required(false)
@@ -93,15 +106,15 @@ impl BuildInArgs {
     // }
 
     pub fn get<'a, 'b>(name: &String) -> std::vec::Vec<Arg<'a, 'b>> {
-        if name == "page_index" {
+        if name == "page-index" {
             vec![BuildInArgs::page_index()]
-        } else if name == "page_size" {
+        } else if name == "page-size" {
             vec![BuildInArgs::page_size()]
         } else if name == "content" {
             vec![BuildInArgs::content()]
         } else if name == "input" {
             vec![BuildInArgs::input()]
-        } else if name == "content_and_input" {
+        } else if name == "content-and-input" {
             vec![BuildInArgs::content(), BuildInArgs::input()]
         } else {
             vec![]

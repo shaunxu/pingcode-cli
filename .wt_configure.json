@@ -39,10 +39,10 @@
                                 "description": "The identifier of the project"
                             },
                             {
-                                "name": "page_index"
+                                "name": "page-index"
                             },
                             {
-                                "name": "page_size"
+                                "name": "page-size"
                             }
                         ]
                     }
@@ -57,7 +57,7 @@
                         "description": "Create a new epic",
                         "args": [
                             {
-                                "name": "content_and_input"
+                                "name": "content-and-input"
                             }
                         ]
                     }
@@ -72,7 +72,7 @@
                         "description": "Create a new feature",
                         "args": [
                             {
-                                "name": "content_and_input"
+                                "name": "content-and-input"
                             }
                         ]
                     }
@@ -87,7 +87,7 @@
                         "description": "Create a new user story",
                         "args": [
                             {
-                                "name": "content_and_input"
+                                "name": "content-and-input"
                             }
                         ]
                     }
@@ -117,7 +117,84 @@
                         "description": "Create a new bug",
                         "args": [
                             {
-                                "name": "content_and_input"
+                                "name": "content-and-input"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "workitems",
+                "route": "work_items",
+                "description": "Manage your workitems (epics, features and user stories) in an agile project",
+                "ops": [
+                    {
+                        "name": "list",
+                        "description": "List workitems with filters",
+                        "args": [
+                            {
+                                "name": "project-id",
+                                "take_value": true,
+                                "description": "Filter workitems with the id of project"
+                            },
+                            {
+                                "name": "assignee-id",
+                                "take_value": true,
+                                "description": "Filter workitems with the uid of assignee"
+                            },
+                            {
+                                "name": "state-id",
+                                "take_value": true,
+                                "description": "Filter workitems with the id of state"
+                            },
+                            {
+                                "name": "identifier",
+                                "take_value": true,
+                                "description": "Filter workitems with the identifier"
+                            },
+                            {
+                                "name": "sprint-id",
+                                "take_value": true,
+                                "description": "Filter workitems with the id of sprint under a scrum project"
+                            },
+                            {
+                                "name": "board-id",
+                                "take_value": true,
+                                "description": "Filter workitems with the id of board under a kanban project"
+                            },
+                            {
+                                "name": "entry-id",
+                                "take_value": true,
+                                "description": "Filter workitems with the id of entry under a kanban project"
+                            },
+                            {
+                                "name": "swimlane-id",
+                                "take_value": true,
+                                "description": "Filter workitems with the id of swimlane under a kanban project"
+                            },
+                            {
+                                "name": "type",
+                                "take_value": true,
+                                "possible_values": [
+                                    "epic",
+                                    "feature",
+                                    "story",
+                                    "task",
+                                    "bug",
+                                    "issue"
+                                ],
+                                "description": "Filter workitems with a type"
+                            },
+                            {
+                                "name": "version-id",
+                                "take_value": true,
+                                "description": "Filter workitems with the id of a version"
+                            },
+                            {
+                                "name": "page-index"
+                            },
+                            {
+                                "name": "page-size"
                             }
                         ]
                     }
@@ -155,10 +232,10 @@
                                 "description": "Login name of a user"
                             },
                             {
-                                "name": "page_index"
+                                "name": "page-index"
                             },
                             {
-                                "name": "page_size"
+                                "name": "page-size"
                             }
                         ]
                     }

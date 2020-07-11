@@ -7,6 +7,7 @@ pub mod agile_features_create;
 pub mod agile_stories_create;
 pub mod agile_tasks_create;
 pub mod agile_bugs_create;
+pub mod agile_workitems_list;
 pub mod op_executor;
 
 use crate::AnyError;
@@ -57,6 +58,10 @@ impl OpExecutors {
         es.insert(
             String::from("agile_bugs_create"),
             Box::new(agile_bugs_create::AgileBugsCreateOpExecutor {}),
+        );
+        es.insert(
+            String::from("agile_workitems_list"),
+            Box::new(agile_workitems_list::AgileWorkitemsListOpExecutor {}),
         );
         OpExecutors { executors: es }
     }
