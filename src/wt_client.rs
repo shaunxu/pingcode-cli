@@ -77,7 +77,7 @@ struct AuthResponse {
 
 impl WTClient {
     fn get_client_path() -> &'static str {
-        ".wt_client.json"
+        ".pc_client.json"
     }
 
     async fn request_internal(

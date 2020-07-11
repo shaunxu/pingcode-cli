@@ -136,7 +136,7 @@ impl Area {
 pub struct Configure {}
 impl Configure {
     pub fn load(path: Option<&str>) -> Result<std::vec::Vec<Area>, AnyError> {
-        let path = path.unwrap_or(".wt_configure.json");
+        let path = path.unwrap_or(".pc_configure.json");
         let content = std::fs::read_to_string(path)?;
         let json: std::vec::Vec<Area> = serde_json::from_str(&content)?;
         Ok(json)
