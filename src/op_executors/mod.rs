@@ -1,14 +1,11 @@
-pub mod agile_projects_get;
-pub mod agile_projects_list;
-pub mod directory_users_get;
-pub mod directory_users_list;
-pub mod agile_epics_create;
-pub mod agile_features_create;
-pub mod agile_stories_create;
-pub mod agile_tasks_create;
-pub mod agile_bugs_create;
-pub mod agile_workitems_list;
-pub mod agile_workitems_delete;
+pub mod agile_projects;
+pub mod directory_users;
+pub mod agile_epics;
+pub mod agile_features;
+pub mod agile_stories;
+pub mod agile_tasks;
+pub mod agile_bugs;
+pub mod agile_workitems;
 pub mod op_executor;
 
 use crate::AnyError;
@@ -26,47 +23,47 @@ impl OpExecutors {
             std::collections::HashMap::new();
         es.insert(
             String::from("agile_projects_list"),
-            Box::new(agile_projects_list::AgileProjectListOpExecutor {}),
+            Box::new(agile_projects::AgileProjectListOpExecutor {}),
         );
         es.insert(
             String::from("agile_projects_get"),
-            Box::new(agile_projects_get::AgileProjectGetOpExecutor {}),
+            Box::new(agile_projects::AgileProjectGetOpExecutor {}),
         );
         es.insert(
             String::from("directory_users_get"),
-            Box::new(directory_users_get::DirectoryUsersGetOpExecutor {}),
+            Box::new(directory_users::DirectoryUsersGetOpExecutor {}),
         );
         es.insert(
             String::from("directory_users_list"),
-            Box::new(directory_users_list::DirectoryUsersListOpExecutor {}),
+            Box::new(directory_users::DirectoryUsersListOpExecutor {}),
         );
         es.insert(
             String::from("agile_epics_create"),
-            Box::new(agile_epics_create::AgileEpicCreateOpExecutor {}),
+            Box::new(agile_epics::AgileEpicCreateOpExecutor {}),
         );
         es.insert(
             String::from("agile_features_create"),
-            Box::new(agile_features_create::AgileFeaturesCreateOpExecutor {}),
+            Box::new(agile_features::AgileFeaturesCreateOpExecutor {}),
         );
         es.insert(
             String::from("agile_stories_create"),
-            Box::new(agile_stories_create::AgileStoriesCreateOpExecutor {}),
+            Box::new(agile_stories::AgileStoriesCreateOpExecutor {}),
         );
         es.insert(
             String::from("agile_tasks_create"),
-            Box::new(agile_tasks_create::AgileTasksCreateOpExecutor {}),
+            Box::new(agile_tasks::AgileTasksCreateOpExecutor {}),
         );
         es.insert(
             String::from("agile_bugs_create"),
-            Box::new(agile_bugs_create::AgileBugsCreateOpExecutor {}),
+            Box::new(agile_bugs::AgileBugsCreateOpExecutor {}),
         );
         es.insert(
             String::from("agile_workitems_list"),
-            Box::new(agile_workitems_list::AgileWorkitemsListOpExecutor {}),
+            Box::new(agile_workitems::AgileWorkitemsListOpExecutor {}),
         );
         es.insert(
             String::from("agile_workitems_delete"),
-            Box::new(agile_workitems_delete::AgileWorkitemsDeleteOpExecutor {}),
+            Box::new(agile_workitems::AgileWorkitemsDeleteOpExecutor {}),
         );
         OpExecutors { executors: es }
     }
