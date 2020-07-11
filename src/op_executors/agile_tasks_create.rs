@@ -8,7 +8,7 @@ use crate::args::ArgParser;
 pub struct AgileTasksCreateOpExecutor {}
 
 impl OpExecutor for AgileTasksCreateOpExecutor {
-    fn on_execute<'a>(&self, matches: &'a ArgMatches, context: &OpContext) -> Result<OpRequest<'a>, AnyError> {
+    fn on_execute<'a>(&self, matches: &'a ArgMatches, _context: &OpContext) -> Result<OpRequest<'a>, AnyError> {
         Ok(OpRequest {
             method: reqwest::Method::POST,
             param: None,
