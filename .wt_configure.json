@@ -102,7 +102,7 @@
                         "description": "Create a new task",
                         "args": [
                             {
-                                "name": "content_and_input"
+                                "name": "content-and-input"
                             }
                         ]
                     }
@@ -195,6 +195,18 @@
                             },
                             {
                                 "name": "page-size"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "delete",
+                        "description": "Delete a workitems by id",
+                        "args": [
+                            {
+                                "name": "id",
+                                "take_value": true,
+                                "required": true,
+                                "description": "The id of the workitem will be deleted"
                             }
                         ]
                     }
