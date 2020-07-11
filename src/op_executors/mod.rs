@@ -65,6 +65,10 @@ impl OpExecutors {
             String::from("agile_workitems_delete"),
             Box::new(agile_workitems::AgileWorkitemsDeleteOpExecutor {}),
         );
+        es.insert(
+            String::from("agile_epics_update"),
+            Box::new(agile_epics::AgileEpicUpdateOpExecutor {}),
+        );
         OpExecutors { executors: es }
     }
 

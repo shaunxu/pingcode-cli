@@ -60,6 +60,21 @@
                                 "name": "content-and-input"
                             }
                         ]
+                    },
+                    {
+                        "name": "update",
+                        "description": "Update an existing epic",
+                        "args": [
+                            {
+                                "name": "id",
+                                "take_value": true,
+                                "required": true,
+                                "description": "The id of the epic will be updated"
+                            },
+                            {
+                                "name": "content-and-input"
+                            }
+                        ]
                     }
                 ]
             },
