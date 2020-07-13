@@ -1,17 +1,18 @@
-pub mod agile_projects;
-pub mod directory_users;
+pub mod agile_bugs;
 pub mod agile_epics;
 pub mod agile_features;
+pub mod agile_participants;
+pub mod agile_projects;
 pub mod agile_stories;
 pub mod agile_tasks;
-pub mod agile_bugs;
 pub mod agile_workitems;
+pub mod directory_users;
 pub mod op_executor;
 
-use crate::AnyError;
 use crate::configure::OpContext;
-use clap::ArgMatches;
 use crate::wt_error::WTError;
+use crate::AnyError;
+use clap::ArgMatches;
 
 pub struct OpExecutors {
     executors: std::collections::HashMap<String, Box<dyn op_executor::OpExecutor>>,
@@ -69,6 +70,14 @@ impl OpExecutors {
             String::from("agile_epics_update"),
             Box::new(agile_epics::AgileEpicUpdateOpExecutor {}),
         );
+        es.insert(
+            String::from("agile_participants_list"),
+            Box::new(agile_participants::AgileParticipantsListOpExecutor {}),
+        );
+        es.insert(
+            String::from("agile_participants_add"),
+            Box::new(agile_participants::AgileParticipantsAddOpExecutor {}),
+        );
         OpExecutors { executors: es }
     }
 
@@ -76,7 +85,10 @@ impl OpExecutors {
         if let Some(executor) = self.executors.get(&ctx.key) {
             executor.execute(matches, ctx)
         } else {
-            Err(WTError::new_boxed("000000", &format!("Cannot find op through {}", ctx.key)))
+            Err(WTError::new_boxed(
+                "000000",
+                &format!("Cannot find op through {}", ctx.key),
+            ))
         }
     }
 }

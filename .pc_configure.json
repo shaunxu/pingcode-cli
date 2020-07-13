@@ -226,6 +226,49 @@
                         ]
                     }
                 ]
+            },
+            {
+                "name": "participants",
+                "route": "participants",
+                "description": "Manage participants in a workitem (epic, feature, user story, task, bug or issue).",
+                "ops": [
+                    {
+                        "name": "list",
+                        "description": "List all participants in a workitem.",
+                        "args": [
+                            {
+                                "name": "work-item-id",
+                                "take_value": true,
+                                "required": true,
+                                "description": "The workitem id where participants associated"
+                            },
+                            {
+                                "name": "page-index"
+                            },
+                            {
+                                "name": "page-size"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "add",
+                        "description": "Add a participant in a workitem.",
+                        "args": [
+                            {
+                                "name": "work-item-id",
+                                "take_value": true,
+                                "required": true,
+                                "description": "The workitem id where participants associated"
+                            },
+                            {
+                                "name": "uid",
+                                "take_value": true,
+                                "required": true,
+                                "description": "The user id which is going to be added as participant"
+                            }
+                        ]
+                    }
+                ]
             }
         ]
     },

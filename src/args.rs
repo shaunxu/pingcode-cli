@@ -1,4 +1,5 @@
 use crate::configure::OpContext;
+use crate::wt_client::Parent;
 use crate::wt_error::WTError;
 use crate::AnyError;
 use clap::Arg;
@@ -52,6 +53,20 @@ impl ArgParser {
         } else {
             Ok(Some(serde_json::Value::default()))
         }
+    }
+
+    pub fn parse_parents(
+        matches: &ArgMatches,
+        resource_and_args: std::vec::Vec<(&str, &str)>,
+    ) -> std::vec::Vec<Parent> {
+        let mut parents: std::vec::Vec<Parent> = vec![];
+        for (resource, arg) in resource_and_args.iter() {
+            parents.push(Parent::new(
+                String::from(*resource),
+                String::from(matches.value_of(arg).unwrap()),
+            ));
+        }
+        parents
     }
 }
 

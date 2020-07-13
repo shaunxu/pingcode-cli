@@ -1,10 +1,10 @@
 use super::AnyError;
+use crate::wt_error::WTError;
 use reqwest::header::HeaderMap;
 use reqwest::{Client, Method};
 use serde::Deserialize;
 use serde::Serialize;
 use std::io::Write;
-use crate::wt_error::WTError;
 
 type ApiResult = Result<serde_json::Value, AnyError>;
 
@@ -75,6 +75,20 @@ struct AuthResponse {
     token_type: String,
 }
 
+pub struct Parent {
+    resource: String,
+    param: String,
+}
+
+impl Parent {
+    pub fn new(resource: String, param: String) -> Parent {
+        Parent {
+            resource: resource,
+            param: param,
+        }
+    }
+}
+
 impl WTClient {
     fn get_client_path() -> &'static str {
         ".pc_client.json"
@@ -119,6 +133,7 @@ impl WTClient {
         area: Option<&str>,
         resource: &str,
         param: Option<&str>,
+        parents: Option<std::vec::Vec<Parent>>,
         query: Option<std::vec::Vec<(String, String)>>,
         body: Option<&serde_json::Value>,
     ) -> ApiResult {
@@ -155,6 +170,13 @@ impl WTClient {
         uri.push(&format!("v{}", &config.version.unwrap()));
         if let Some(area) = area {
             uri.push(area);
+        }
+        // build parents before resource
+        if let Some(parents) = parents {
+            for parent in parents.iter() {
+                uri.push(parent.resource.clone());
+                uri.push(parent.param.clone());
+            }
         }
         uri.push(resource);
         if let Some(param) = param {
@@ -196,7 +218,8 @@ impl WTClient {
     }
 
     pub async fn ping() -> Result<String, AnyError> {
-        let res = WTClient::request(Method::GET, Some("auth"), "ping", None, None, None).await?;
+        let res =
+            WTClient::request(Method::GET, Some("auth"), "ping", None, None, None, None).await?;
         let res: serde_json::Value = serde_json::from_value(res)?;
         if let serde_json::Value::String(pong) = &res["data"] {
             Ok(pong.clone())
@@ -204,5 +227,4 @@ impl WTClient {
             Err(WTError::new_boxed("000000", "Invalid ping response"))
         }
     }
-
 }
