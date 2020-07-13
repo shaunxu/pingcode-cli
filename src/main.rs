@@ -14,7 +14,15 @@ mod wt_error;
 type AnyError = Box<dyn Error>;
 
 const CLAP_TEMPLATE: &'static str = r"
-{about} v{version}
+    ____  _             ______          __   
+   / __ \(_)___  ____ _/ ____/___  ____/ /__ 
+  / /_/ / / __ \/ __ `/ /   / __ \/ __  / _ \
+ / ____/ / / / / /_/ / /___/ /_/ / /_/ /  __/
+/_/   /_/_/ /_/\__, /\____/\____/\__,_/\___/ 
+              /____/                         
+
+{about}
+v{version}
 by [{author}]
 
 USAGE:
