@@ -78,6 +78,10 @@ impl OpExecutors {
             String::from("agile_participants_add"),
             Box::new(agile_participants::AgileParticipantsAddOpExecutor {}),
         );
+        es.insert(
+            String::from("agile_participants_remove"),
+            Box::new(agile_participants::AgileParticipantsRemoveOpExecutor {}),
+        );
         OpExecutors { executors: es }
     }
 

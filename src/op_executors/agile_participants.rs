@@ -49,3 +49,23 @@ impl OpExecutor for AgileParticipantsAddOpExecutor {
         })
     }
 }
+
+pub struct AgileParticipantsRemoveOpExecutor {}
+impl OpExecutor for AgileParticipantsRemoveOpExecutor {
+    fn on_execute<'a>(
+        &self,
+        matches: &'a ArgMatches,
+        _context: &OpContext,
+    ) -> Result<OpRequest<'a>, AnyError> {
+        Ok(OpRequest {
+            method: reqwest::Method::DELETE,
+            param: matches.value_of("uid"),
+            query: None,
+            body: None,
+            parents: Some(ArgParser::parse_parents(
+                matches,
+                vec![("work_items", "work-item-id")],
+            )),
+        })
+    }
+}

@@ -264,7 +264,25 @@
                                 "name": "uid",
                                 "take_value": true,
                                 "required": true,
-                                "description": "The user id which is going to be added as participant"
+                                "description": "The user id which is going to be added"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "remove",
+                        "description": "Remove a participant from a workitem.",
+                        "args": [
+                            {
+                                "name": "work-item-id",
+                                "take_value": true,
+                                "required": true,
+                                "description": "The workitem id where participants associated"
+                            },
+                            {
+                                "name": "uid",
+                                "take_value": true,
+                                "required": true,
+                                "description": "The user id which is going to be removed"
                             }
                         ]
                     }
