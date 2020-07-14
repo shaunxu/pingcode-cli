@@ -45,12 +45,12 @@ async fn main() -> Result<(), AnyError> {
     );
     app = app.subcommand(
         SubCommand::with_name("login")
-            .about("Login Worktile REST API with client id and client secret")
+            .about("Login PingCode REST API with client id and client secret")
             .arg(
                 Arg::with_name("client_id")
                     .short("c")
                     .long("client-id")
-                    .help("The Client ID in Worktile REST API application")
+                    .help("The Client ID in PingCode REST API application")
                     .takes_value(true)
                     .required(true),
             )
@@ -58,7 +58,7 @@ async fn main() -> Result<(), AnyError> {
                 Arg::with_name("client_secret")
                     .short("s")
                     .long("client-secret")
-                    .help("The Client Secret in Worktile REST API application")
+                    .help("The Client Secret in PingCode REST API application")
                     .takes_value(true)
                     .required(true),
             )
@@ -66,7 +66,7 @@ async fn main() -> Result<(), AnyError> {
                 Arg::with_name("api_endpoint")
                     .short("e")
                     .long("api-endpoint")
-                    .help("Worktile REST API endpoint")
+                    .help("PingCode REST API endpoint")
                     .takes_value(true)
                     .required(true)
                     .default_value("https://open.worktile.com"),
@@ -75,7 +75,7 @@ async fn main() -> Result<(), AnyError> {
                 Arg::with_name("version")
                     .short("v")
                     .long("version")
-                    .help("Worktile REST API version")
+                    .help("PingCode REST API version")
                     .takes_value(true)
                     .required(true)
                     .default_value("1"),
