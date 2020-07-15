@@ -1,0 +1,52 @@
+name: release
+
+on:
+  push:
+    tags: 'v*'
+
+
+jobs:
+  build:
+
+    strategy:
+      matrix:
+        includes:
+          - os: ubuntu-latest
+            artifact_name: pc
+            asset_name: pc-linux-x64
+          - os: macos-latest
+            artifact_name: pc
+            asset_name: pc-darwin-x64
+          - os: windows-latest
+            artifact_name: pc
+            asset_name: pc-win-x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: checkout the source code
+      uses: actions/checkout@v2
+    - name: build (release)
+      run: cargo build --verbose --release
+    - name: run tests
+      run: cargo test --verbose
+    - name: create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: upload release assets
+      id: upload-release-assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${{ matrix.artifact_name }}
+        asset_name: ${{ matrix.asset_name }}
+        asset_content_type: application/zip

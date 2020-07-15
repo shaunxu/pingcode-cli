@@ -19,9 +19,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Checkout Code
+    - name: checkout the source code
       uses: actions/checkout@v2
-    - name: Build
+    - name: build (debug)
       run: cargo build --verbose
-    - name: Run tests
+    - name: run tests
       run: cargo test --verbose
