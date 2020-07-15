@@ -20,7 +20,7 @@ jobs:
         prerelease: false
     - shell: bash
       run: |
-        ::set-env name=upload_url::${{ steps.create_release.outputs.upload_url }}
+        set-env name=upload_url::${{ steps.create_release.outputs.upload_url }}
   upload_assets:
     needs: create_release
     strategy:
