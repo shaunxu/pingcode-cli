@@ -1,0 +1,29 @@
+name: create release
+
+on:
+  push:
+    tags: 'v*'
+
+
+jobs:
+  release:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: dispatch release created event
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        event-type: release-created
+        client-payload: '{ "new_version": "${{ steps.create_release.outputs.tag_name }}" }'
