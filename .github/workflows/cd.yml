@@ -6,11 +6,11 @@ on:
 
 
 jobs:
-  build:
+  release:
 
     strategy:
       matrix:
-        includes:
+        include:
           - os: ubuntu-latest
             artifact_name: pc
             asset_name: pc-linux-x64
