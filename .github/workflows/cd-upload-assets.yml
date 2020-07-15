@@ -5,7 +5,7 @@ on:
     types: [release-created]
 
 jobs:
-  release:
+  deliver:
 
     strategy:
       matrix:
