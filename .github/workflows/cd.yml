@@ -1,12 +1,25 @@
-name: upload release assets
+name: release
 
 on:
-  repository_dispatch:
-    types: [release-created]
+  push:
+    tags: 'v*'
 
 jobs:
-  deliver:
-
+  create_release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: release ${{ github.ref }}
+        draft: false
+        prerelease: false
+  upload_assets:
+    needs: create_release
     strategy:
       matrix:
         include:
@@ -19,9 +32,7 @@ jobs:
           - os: windows-latest
             artifact_name: pc.exe
             asset_name: pc-win-x64
-
     runs-on: ${{ matrix.os }}
-
     steps:
     - name: checkout the source code
       uses: actions/checkout@v2
@@ -33,7 +44,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ github.event.client_payload.upload_url }}
+        upload_url: ${{ jobs.create_release.steps.create_release.outputs.upload_url }}
         asset_path: ./target/release/${{ matrix.artifact_name }}
         asset_name: ${{ matrix.asset_name }}
         asset_content_type: application/zip
