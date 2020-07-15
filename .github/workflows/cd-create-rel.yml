@@ -26,4 +26,4 @@ jobs:
       with:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
         event-type: release-created
-        client-payload: '{ "new_version": "${{ steps.create_release.outputs.tag_name }}" }'
+        client-payload: '{ "new_version": "${{ github.ref }}", "upload_url": "${{ steps.create_release.outputs.upload_url }}" }'
