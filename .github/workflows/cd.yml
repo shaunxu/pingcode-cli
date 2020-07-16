@@ -27,19 +27,27 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact_name: pc
-            asset_name: pc-linux-x64
+            asset_name: pc-linux-x64.tar.gz
           - os: macos-latest
             artifact_name: pc
-            asset_name: pc-darwin-x64
+            asset_name: pc-darwin-x64.tar.gz
           - os: windows-latest
             artifact_name: pc.exe
-            asset_name: pc-win-x64
+            asset_name: pc-win-x64.tar.gz
     runs-on: ${{ matrix.os }}
     steps:
     - name: checkout the source code
       uses: actions/checkout@v2
     - name: build (release)
       run: cargo build --verbose --release
+    - name: compress
+      uses: master-atul/tar-action@v1.0.2
+      with:
+        command: c
+        cwd: ./target/release/
+        files: |
+          ./${{ matrix.artifact_name }}
+        outPath: ${{ matrix.asset_name }}
     - name: upload release assets
       id: upload-release-assets
       uses: actions/upload-release-asset@v1
@@ -49,4 +57,4 @@ jobs:
         upload_url: ${{ needs.create_release.outputs.upload_url }}
         asset_path: ./target/release/${{ matrix.artifact_name }}
         asset_name: ${{ matrix.asset_name }}
-        asset_content_type: application/zip
+        asset_content_type: application/tar+gzip
