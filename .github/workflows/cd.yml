@@ -44,9 +44,10 @@ jobs:
       uses: master-atul/tar-action@v1.0.2
       with:
         command: c
+        cwd: ./target/release
         files: |
-          ./target/release/${{ matrix.artifact_name }}
-        outPath: ./target/release/${{ matrix.asset_name }}
+          ./${{ matrix.artifact_name }}
+        outPath: ./${{ matrix.asset_name }}
     - name: upload release assets
       id: upload-release-assets
       uses: actions/upload-release-asset@v1
