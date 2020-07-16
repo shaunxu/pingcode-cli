@@ -30,6 +30,8 @@ USAGE:
 
 {all-args}";
 
+const PC_CONFIGURE_JSON: &'static str = include_str!("../.pc_configure.json");
+
 #[tokio::main]
 async fn main() -> Result<(), AnyError> {
     let mut app = app_from_crate!()
@@ -86,7 +88,7 @@ async fn main() -> Result<(), AnyError> {
             .about("Test the connective and verify authentication information"),
     );
 
-    let areas = configure::Configure::load(None)?;
+    let areas = configure::Configure::load(PC_CONFIGURE_JSON)?;
     let commands = configure::Configure::generate_subcommands(&areas);
     let executors = op_executors::OpExecutors::initialize();
 
