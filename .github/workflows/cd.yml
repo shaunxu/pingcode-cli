@@ -18,8 +18,8 @@ jobs:
         release_name: release ${{ github.ref }}
         draft: false
         prerelease: false
-    - outputs:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
   upload_assets:
     needs: create_release
     strategy:
