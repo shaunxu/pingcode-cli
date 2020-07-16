@@ -47,7 +47,7 @@ jobs:
         cwd: ./target/release
         files: |
           ./${{ matrix.artifact_name }}
-        outPath: ./${{ matrix.asset_name }}
+        outPath: ./target/release/${{ matrix.asset_name }}
     - name: upload release assets
       id: upload-release-assets
       uses: actions/upload-release-asset@v1
