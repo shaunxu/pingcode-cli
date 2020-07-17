@@ -46,7 +46,7 @@ jobs:
         command: c
         cwd: ./target/release
         files: |
-          ./${{ matrix.artifact_name }}
+          ${{ matrix.artifact_name }}
         outPath: ./target/release/${{ matrix.asset_name }}
     - name: upload release assets
       id: upload-release-assets
