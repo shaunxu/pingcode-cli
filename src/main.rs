@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate clap;
+extern crate semver;
 
 use clap::{Arg, SubCommand};
 use std::error::Error;
@@ -32,8 +33,7 @@ USAGE:
 
 const PC_CONFIGURE_JSON: &'static str = include_str!("../.pc_configure.json");
 
-#[tokio::main]
-async fn main() -> Result<(), AnyError> {
+fn main() -> Result<(), AnyError> {
     let mut app = app_from_crate!()
         .template(CLAP_TEMPLATE)
         .help_message("Help")
@@ -87,6 +87,16 @@ async fn main() -> Result<(), AnyError> {
         SubCommand::with_name("test")
             .about("Test the connective and verify authentication information"),
     );
+    app = app.subcommand(
+        SubCommand::with_name("update")
+            .about("Fetch and upgrade to the latest version")
+            .arg(
+                Arg::with_name("dry_run")
+                    .long("dry-run")
+                    .help("Check the latest version but not update")
+                    .required(false),
+            ),
+    );
 
     let areas = configure::Configure::load(PC_CONFIGURE_JSON)?;
     let commands = configure::Configure::generate_subcommands(&areas);
@@ -100,7 +110,8 @@ async fn main() -> Result<(), AnyError> {
         let client_secret = String::from(subcommand.value_of("client_secret").unwrap());
         let api_endpoint = String::from(subcommand.value_of("api_endpoint").unwrap());
         let version = String::from(subcommand.value_of("version").unwrap());
-        match wt_client::WTClient::auth(&client_id, &client_secret, &api_endpoint, &version).await {
+        let fut = wt_client::WTClient::auth(&client_id, &client_secret, &api_endpoint, &version);
+        match tokio::runtime::Runtime::new()?.block_on(fut) {
             Ok(()) => println!("Login successful."),
             Err(e) => println!("Failed: {}", e),
         }
@@ -108,10 +119,85 @@ async fn main() -> Result<(), AnyError> {
 
     if let Some(_) = clap.subcommand_matches("test") {
         print!("Connecting ... ");
-        let res = wt_client::WTClient::ping().await;
-        match res {
+        let fut = wt_client::WTClient::ping();
+        match tokio::runtime::Runtime::new()?.block_on(fut) {
             Ok(pong) => println!("Ok: {}", pong),
             Err(e) => println!("Failed: {}", e),
+        }
+    }
+
+    if let Some(subcommand) = clap.subcommand_matches("update") {
+        if let Some((platform, bin_name)) = match std::env::consts::OS {
+            "linux" => Some(("linux", "./pc")),
+            "macos" => Some(("darwin", "./pc")),
+            "windows" => Some(("win", "./pc.exe")),
+            _ => None,
+        } {
+            let releases = self_update::backends::github::ReleaseList::configure()
+                .repo_owner("shaunxu")
+                .repo_name("pingcode-cli")
+                .build()?
+                .fetch()?;
+            if let Some(latest_rel) = releases.first() {
+                let current_version = semver::Version::parse(crate_version!())?;
+                let latest_version = semver::Version::parse(&latest_rel.version)?;
+                if latest_version > current_version {
+                    println!(
+                        "Latest version found v{}, while you have v{} installed",
+                        latest_version, current_version
+                    );
+                    if !subcommand.is_present("dry_run") {
+                        let asset_name = format!("pc-{}-x64.tar.gz", platform);
+                        if let Some(asset) = latest_rel.asset_for(&asset_name) {
+                            let tmp_dir = tempfile::Builder::new()
+                                .prefix("pc_update_")
+                                .tempdir_in(std::env::current_dir()?)?;
+                            let tmp_tarball_path = tmp_dir.path().join(&asset.name);
+                            let tmp_tarball = std::fs::OpenOptions::new()
+                                .read(true)
+                                .write(true)
+                                .create(true)
+                                .open(&tmp_tarball_path)?;
+
+                            self_update::Download::from_url(&asset.download_url)
+                                .show_progress(true)
+                                .download_to(&tmp_tarball)?;
+                            let bin_name = std::path::PathBuf::from(bin_name);
+                            println!("tmp_tarball_path = {}", tmp_tarball_path.to_str().unwrap());
+                            println!("tmp_dir = {}", tmp_dir.path().to_str().unwrap());
+                            println!("bin_name = {}", bin_name.to_str().unwrap());
+
+                            self_update::Extract::from_source(&tmp_tarball_path)
+                                .archive(self_update::ArchiveKind::Tar(Some(
+                                    self_update::Compression::Gz,
+                                )))
+                                // .extract_into(&tmp_dir.path())?;
+                                .extract_file(&tmp_dir.path(), &bin_name)?;
+                            // let tmp_file = tmp_dir.path().join("replacement_tmp");
+                            // let bin_path = tmp_dir.path().join(bin_name);
+
+                            // println!("bin_path = {}", bin_path.to_str().unwrap());
+                            // println!("tmp_file = {}", tmp_file.to_str().unwrap());
+                            // println!(
+                            //     "current_exe = {}",
+                            //     &std::env::current_exe()?.to_str().unwrap()
+                            // );
+
+                        // self_update::Move::from_source(&bin_path)
+                        //     .replace_using_temp(&tmp_file)
+                        //     .to_dest(&std::env::current_exe()?)?;
+                        } else {
+                            println!("Cannot find asset by name {}", asset_name);
+                        }
+                    }
+                } else {
+                    println!("You are running the latest version, enjoy. (latest version = {}, running version = {})", latest_version, current_version);
+                }
+            } else {
+                println!("No releases available");
+            }
+        } else {
+            println!("Invalid operation system found");
         }
     }
 
