@@ -17,6 +17,8 @@ serde = { version = "1.0.114", features = ["derive"] }
 serde_json = "1.0.56"
 clap = "2.33.1"
 chrono = { version = "0.4.13", features = ["serde"] }
-self_update = { version = "0.16.0", features = ["archive-tar"] }
+self_update = { version = "0.16.0", features = ["archive-tar", "compression-flate2"] }
 semver = "0.10.0"
 tempfile = "3.1.0"
+tar = "0.4.29"
+flate2 = "1.0"
