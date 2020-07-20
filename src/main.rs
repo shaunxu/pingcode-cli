@@ -1,5 +1,7 @@
 #[macro_use]
 extern crate clap;
+#[macro_use]
+extern crate magic_crypt;
 extern crate semver;
 
 use clap::{Arg, SubCommand};

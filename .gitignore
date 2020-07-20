@@ -14,4 +14,4 @@ Cargo.lock
 
 /target
 
-.pc_client.json
+.pc_client
