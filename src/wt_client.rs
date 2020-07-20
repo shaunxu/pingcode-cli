@@ -1,5 +1,6 @@
 use super::AnyError;
 use crate::wt_error::WTError;
+use magic_crypt::MagicCryptTrait;
 use reqwest::header::HeaderMap;
 use reqwest::{Client, Method};
 use serde::Deserialize;
@@ -7,6 +8,8 @@ use serde::Serialize;
 use std::io::Write;
 
 type ApiResult = Result<serde_json::Value, AnyError>;
+
+const PC_CLIENT_JSON_ENCRYPTION_KEY: &'static str = "PmtIO4eCl6u11mKp";
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WTClientConfig {
@@ -38,7 +41,9 @@ impl WTClientConfig {
     }
 
     pub fn load(path: &str) -> WTClientConfig {
-        if let Ok(content) = std::fs::read_to_string(path) {
+        if let Ok(base64) = std::fs::read_to_string(path) {
+            let mc = new_magic_crypt!(PC_CLIENT_JSON_ENCRYPTION_KEY, 256);
+            let content = mc.decrypt_base64_to_string(&base64).unwrap();
             let config: WTClientConfig = serde_json::from_str(&content).unwrap();
             config
         } else {
@@ -54,14 +59,16 @@ impl WTClientConfig {
     }
 
     pub fn save(&self, path: &str) -> Result<(), AnyError> {
-        let content = serde_json::to_string_pretty(self).unwrap();
+        let content = serde_json::to_string(self)?;
+        let mc = new_magic_crypt!(PC_CLIENT_JSON_ENCRYPTION_KEY, 256);
+        let base64 = mc.encrypt_str_to_base64(content);
         let mut file = std::fs::OpenOptions::new()
             .read(true)
             .write(true)
             .create(true)
             .open(path)
             .unwrap();
-        write!(file, "{}", content)?;
+        write!(file, "{}", base64)?;
         Ok(())
     }
 }
@@ -91,7 +98,7 @@ impl Parent {
 
 impl WTClient {
     fn get_client_path() -> &'static str {
-        ".pc_client.json"
+        ".pc_client"
     }
 
     async fn request_internal(
