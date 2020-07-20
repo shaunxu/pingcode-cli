@@ -9,9 +9,9 @@ mod args;
 mod configure;
 mod json_printer;
 mod op_executors;
+mod updater;
 mod wt_client;
 mod wt_error;
-mod updater;
 
 type AnyError = Box<dyn Error>;
 
@@ -132,120 +132,6 @@ fn main() -> Result<(), AnyError> {
         if let Err(e) = tokio::runtime::Runtime::new()?.block_on(fut) {
             println!("Failed: {}", e);
         }
-
-        // if let Some((platform, bin_name)) = match std::env::consts::OS {
-        //     "linux" => Some(("linux", "pc")),
-        //     "macos" => Some(("darwin", "pc")),
-        //     "windows" => Some(("win", "pc.exe")),
-        //     _ => None,
-        // } {
-        //     let tmp_tarball_path = format!("./pc-{}-x64.tar.gz", platform);
-        //     let tmp_tarball = std::fs::OpenOptions::new()
-        //         .read(true)
-        //         .write(true)
-        //         .create(true)
-        //         .open(&tmp_tarball_path)?;
-            
-        //     let fut = reqwest::Client::new().request(reqwest::Method::GET, "https://api.github.com/repos/shaunxu/pingcode-cli/releases/assets/22968110").send();
-        //     if let Ok(res) = tokio::runtime::Runtime::new()?.block_on(fut) {
-
-        //     }
-
-        //     self_update::Download::from_url(
-        //         "https://api.github.com/repos/shaunxu/pingcode-cli/releases/assets/22968110",
-        //     )
-        //     .show_progress(true)
-        //     .download_to(&tmp_tarball)?;
-
-        // let data = std::fs::File::open(&tmp_tarball_path)?;
-        // let decompressed = flate2::read::GzDecoder::new(data);
-        // let mut archive = tar::Archive::new(decompressed);
-        // for file in archive.entries().unwrap() {
-        //     let file = file.unwrap();
-        //     println!("{:?}", file.header().path().unwrap());
-        //     println!("{}", file.header().size().unwrap());
-        // }
-
-        //     let releases = self_update::backends::github::ReleaseList::configure()
-        //         .repo_owner("shaunxu")
-        //         .repo_name("pingcode-cli")
-        //         .build()?
-        //         .fetch()?;
-        //     if let Some(latest_rel) = releases.first() {
-        //         let current_version = semver::Version::parse(crate_version!())?;
-        //         let latest_version = semver::Version::parse(&latest_rel.version)?;
-        //         if latest_version > current_version {
-        //             println!(
-        //                 "Latest version found v{}, while you have v{} installed",
-        //                 latest_version, current_version
-        //             );
-        //             if !subcommand.is_present("dry_run") {
-        //                 let asset_name = format!("pc-{}-x64.tar.gz", platform);
-        //                 if let Some(asset) = latest_rel.asset_for(&asset_name) {
-        //                     let tmp_dir = tempfile::Builder::new()
-        //                         .prefix("pc_update_")
-        //                         .tempdir_in(std::env::current_dir()?)?;
-        //                     let tmp_tarball_path = tmp_dir.path().join(&asset.name);
-        //                     let tmp_tarball = std::fs::OpenOptions::new()
-        //                         .read(true)
-        //                         .write(true)
-        //                         .create(true)
-        //                         .open(&tmp_tarball_path)?;
-        //                     println!("{:#?}", asset);
-
-        //                     // self_update::Download::from_url(&asset.download_url)
-        //                     //     .show_progress(true)
-        //                     //     .download_to(&tmp_tarball)?;
-        //                     // // let bin_name = std::path::PathBuf::from(bin_name);
-        //                     // println!("tmp_tarball_path = {}", tmp_tarball_path.to_str().unwrap());
-        //                     // println!("tmp_dir = {}", tmp_dir.path().to_str().unwrap());
-        //                     // println!("bin_name = {}", bin_name);
-
-        //                     // let data = std::fs::File::open(&tmp_tarball_path)?;
-        //                     // let decompressed = flate2::read::GzDecoder::new(data);
-        //                     // let mut archive = tar::Archive::new(decompressed);
-        //                     // for file in archive.entries().unwrap() {
-        //                     //     let file = file.unwrap();
-        //                     //     println!("{:?}", file.header().path().unwrap());
-        //                     //     println!("{}", file.header().size().unwrap());
-        //                     // }
-        //                 // if let Some(entry) = archive.entries()?.find(|x| x.as_ref().unwrap().header().path().unwrap().to_str().unwrap() == bin_name) {
-        //                 //     println!("unpacking");
-        //                 //     entry?.unpack_in(tmp_dir.path().to_str().unwrap()).unwrap();
-        //                 //     println!("unpacked");
-        //                 // }
-
-        //                 // self_update::Extract::from_source(&tmp_tarball_path)
-        //                 //     .archive(self_update::ArchiveKind::Tar(Some(
-        //                 //         self_update::Compression::Gz,
-        //                 //     )))
-        //                 //     .extract_file(&tmp_dir.path(), &bin_name)?;
-        //                 // let tmp_file = tmp_dir.path().join("replacement_tmp");
-        //                 // let bin_path = tmp_dir.path().join(bin_name);
-
-        //                 // println!("bin_path = {}", bin_path.to_str().unwrap());
-        //                 // println!("tmp_file = {}", tmp_file.to_str().unwrap());
-        //                 // println!(
-        //                 //     "current_exe = {}",
-        //                 //     &std::env::current_exe()?.to_str().unwrap()
-        //                 // );
-
-        //                 // self_update::Move::from_source(&bin_path)
-        //                 //     .replace_using_temp(&tmp_file)
-        //                 //     .to_dest(&std::env::current_exe()?)?;
-        //                 } else {
-        //                     println!("Cannot find asset by name {}", asset_name);
-        //                 }
-        //             }
-        //         } else {
-        //             println!("You are running the latest version, enjoy. (latest version = {}, running version = {})", latest_version, current_version);
-        //         }
-        //     } else {
-        //         println!("No releases available");
-        //     }
-        // } else {
-        //     println!("Invalid operation system found");
-        // }
     }
 
     for area in areas.iter() {

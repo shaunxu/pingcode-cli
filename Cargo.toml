@@ -1,7 +1,7 @@
 [package]
 name = "pingcode_cli"
 description = "Command Line Interface for PingCode"
-version = "0.1.0-alpah.22"
+version = "0.1.0-alpah.23"
 authors = ["Shaun Xu <jfarrio@gmail.com>"]
 edition = "2018"
 
@@ -12,12 +12,11 @@ path = "src/main.rs"
 [dependencies]
 futures = "0.3.5"
 tokio = { version = "0.2.21", features = ["full"] }
-reqwest = { version = "0.10.6", features = ["json"] }
+reqwest = { version = "0.10.6", features = ["json", "stream", "blocking"] }
 serde = { version = "1.0.114", features = ["derive"] }
 serde_json = "1.0.56"
 clap = "2.33.1"
 chrono = { version = "0.4.13", features = ["serde"] }
-self_update = { version = "0.16.0", features = ["archive-tar", "compression-flate2"] }
 semver = "0.10.0"
 tempfile = "3.1.0"
 tar = "0.4.29"
