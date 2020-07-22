@@ -31,7 +31,7 @@ pub trait OpExecutor {
             req.query,
             req.body.as_ref(),
         );
-        let res = futures::executor::block_on(fut)?;
+        let res = tokio::runtime::Runtime::new()?.block_on(fut)?;
         Ok(json_printer::JSONPrinter::print_by_arg(res, matches))
     }
 }
