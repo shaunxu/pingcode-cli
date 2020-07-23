@@ -12,7 +12,7 @@ struct User {
 }
 
 #[test]
-fn list() -> helper::TestResult {
+fn t01_directory_users_list() -> helper::TestResult {
     let output = helper::TestHelper::get_exe_command()
         .arg("directory")
         .arg("users")
@@ -81,7 +81,7 @@ fn list() -> helper::TestResult {
 }
 
 #[test]
-fn get_by_id() -> helper::TestResult {
+fn t02_directory_users_get() -> helper::TestResult {
     let output = helper::TestHelper::get_exe_command()
         .arg("directory")
         .arg("users")
