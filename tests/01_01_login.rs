@@ -1,7 +1,7 @@
 mod helper;
 
 #[test]
-fn login_with_valid_id_secret() -> helper::TestResult {
+fn t01_login_with_valid_id_secret() -> helper::TestResult {
     let output = helper::TestHelper::get_exe_command()
         .arg("login")
         .arg("-c")
@@ -18,7 +18,7 @@ fn login_with_valid_id_secret() -> helper::TestResult {
 }
 
 #[test]
-fn test_after_login() -> helper::TestResult {
+fn t02_login_and_verify() -> helper::TestResult {
     let output = helper::TestHelper::get_exe_command().arg("test").output();
     let result = helper::TestHelper::parse_stdout(output)?;
 
