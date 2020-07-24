@@ -7,11 +7,7 @@ use clap::ArgMatches;
 
 pub struct AgileEpicCreateOpExecutor {}
 impl OpExecutor for AgileEpicCreateOpExecutor {
-    fn on_execute<'a>(
-        &self,
-        matches: &'a ArgMatches,
-        _context: &OpContext,
-    ) -> Result<OpRequest<'a>, AnyError> {
+    fn on_execute<'a>(&self, matches: &'a ArgMatches, _context: &OpContext) -> Result<OpRequest<'a>, AnyError> {
         Ok(OpRequest {
             method: reqwest::Method::POST,
             param: None,
@@ -24,11 +20,7 @@ impl OpExecutor for AgileEpicCreateOpExecutor {
 
 pub struct AgileEpicUpdateOpExecutor {}
 impl OpExecutor for AgileEpicUpdateOpExecutor {
-    fn on_execute<'a>(
-        &self,
-        matches: &'a ArgMatches,
-        _context: &OpContext,
-    ) -> Result<OpRequest<'a>, AnyError> {
+    fn on_execute<'a>(&self, matches: &'a ArgMatches, _context: &OpContext) -> Result<OpRequest<'a>, AnyError> {
         Ok(OpRequest {
             method: reqwest::Method::PATCH,
             param: matches.value_of("id"),

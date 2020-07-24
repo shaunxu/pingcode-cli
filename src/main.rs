@@ -37,10 +37,7 @@ USAGE:
 const PC_CONFIGURE_JSON: &'static str = include_str!("../.pc_configure.json");
 
 fn main() -> Result<(), AnyError> {
-    let mut app = app_from_crate!()
-        .template(CLAP_TEMPLATE)
-        .help_message("Help")
-        .version_message("Version");
+    let mut app = app_from_crate!().template(CLAP_TEMPLATE).help_message("Help").version_message("Version");
     app = app.arg(
         Arg::with_name("pretty")
             .long("pretty")
@@ -86,19 +83,11 @@ fn main() -> Result<(), AnyError> {
                     .default_value("1"),
             ),
     );
-    app = app.subcommand(
-        SubCommand::with_name("test")
-            .about("Test the connective and verify authentication information"),
-    );
+    app = app.subcommand(SubCommand::with_name("test").about("Test the connective and verify authentication information"));
     app = app.subcommand(
         SubCommand::with_name("update")
             .about("Fetch and upgrade to the latest version")
-            .arg(
-                Arg::with_name("dry_run")
-                    .long("dry-run")
-                    .help("Check the latest version but not update")
-                    .required(false),
-            ),
+            .arg(Arg::with_name("dry_run").long("dry-run").help("Check the latest version but not update").required(false)),
     );
 
     let areas = configure::Configure::load(PC_CONFIGURE_JSON)?;

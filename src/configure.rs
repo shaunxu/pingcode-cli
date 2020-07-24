@@ -64,12 +64,7 @@ impl OpContext {
 }
 
 impl Op {
-    pub fn match_subcommand(
-        &self,
-        matches: &ArgMatches,
-        ctx: OpContext,
-        op_executors: &OpExecutors,
-    ) -> Result<(), AnyError> {
+    pub fn match_subcommand(&self, matches: &ArgMatches, ctx: OpContext, op_executors: &OpExecutors) -> Result<(), AnyError> {
         if let Some(subcommand) = matches.subcommand_matches(&self.name) {
             op_executors.execute(&ctx.assign_op(self), subcommand)
         } else {
@@ -91,12 +86,7 @@ impl Resource {
         self.route.clone().unwrap_or(self.name.clone())
     }
 
-    pub fn match_subcommand(
-        &self,
-        matches: &ArgMatches,
-        ctx: OpContext,
-        op_executors: &OpExecutors,
-    ) -> Result<(), AnyError> {
+    pub fn match_subcommand(&self, matches: &ArgMatches, ctx: OpContext, op_executors: &OpExecutors) -> Result<(), AnyError> {
         if let Some(subcommand) = matches.subcommand_matches(&self.name) {
             for op in self.ops.iter() {
                 op.match_subcommand(subcommand, ctx.assign_resource(&self), op_executors)?
@@ -119,11 +109,7 @@ impl Area {
         self.route.clone().unwrap_or(self.name.clone())
     }
 
-    pub fn match_subcommand(
-        &self,
-        matches: &ArgMatches,
-        op_executors: &OpExecutors,
-    ) -> Result<(), AnyError> {
+    pub fn match_subcommand(&self, matches: &ArgMatches, op_executors: &OpExecutors) -> Result<(), AnyError> {
         if let Some(subcommand) = matches.subcommand_matches(&self.name) {
             for resource in self.resources.iter() {
                 resource.match_subcommand(subcommand, OpContext::from_area(self), op_executors)?
@@ -142,19 +128,14 @@ impl Configure {
         Ok(json)
     }
 
-    pub fn generate_subcommands<'a, 'b, 'c: 'a + 'b>(
-        areas: &'c std::vec::Vec<Area>,
-    ) -> std::vec::Vec<clap::App<'a, 'b>> {
+    pub fn generate_subcommands<'a, 'b, 'c: 'a + 'b>(areas: &'c std::vec::Vec<Area>) -> std::vec::Vec<clap::App<'a, 'b>> {
         let mut apps: std::vec::Vec<clap::App<'a, 'b>> = vec![];
         for area in areas.iter() {
-            let mut area_subcommand =
-                clap::SubCommand::with_name(&area.name).about(&*area.description);
+            let mut area_subcommand = clap::SubCommand::with_name(&area.name).about(&*area.description);
             for resource in area.resources.iter() {
-                let mut resource_subcommand =
-                    clap::SubCommand::with_name(&resource.name).about(&*resource.description);
+                let mut resource_subcommand = clap::SubCommand::with_name(&resource.name).about(&*resource.description);
                 for op in resource.ops.iter() {
-                    let mut op_subcommand =
-                        clap::SubCommand::with_name(&op.name).about(&*op.description);
+                    let mut op_subcommand = clap::SubCommand::with_name(&op.name).about(&*op.description);
                     for arg in op.args.iter() {
                         let build_in_args = args::BuildInArgs::get(&arg.name);
                         if build_in_args.len() > 0 {

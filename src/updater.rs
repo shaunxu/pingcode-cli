@@ -20,22 +20,13 @@ struct ReleaseAsset {
 impl ReleaseAsset {
     pub async fn perform_update(&self, bin_name: String) -> Result<(), AnyError> {
         // create a temporary folder for asset download
-        let tmp_dir = tempfile::Builder::new()
-            .prefix("pc_update_")
-            .tempdir_in(std::env::current_dir()?)?;
+        let tmp_dir = tempfile::Builder::new().prefix("pc_update_").tempdir_in(std::env::current_dir()?)?;
         let tmp_dir_path = tmp_dir.path();
-        println!(
-            "Preparing temporary folder for update at {}",
-            tmp_dir_path.to_str().unwrap()
-        );
+        println!("Preparing temporary folder for update at {}", tmp_dir_path.to_str().unwrap());
         let tmp_tarball_path = tmp_dir_path.join(self.name.clone());
         // let tmp_dir_path = std::path::Path::new("./");
         // let tmp_tarball_path = tmp_dir_path.join("./pc-darwin-x86.tar.gz");
-        let mut tmp_tarball = std::fs::OpenOptions::new()
-            .read(true)
-            .write(true)
-            .create(true)
-            .open(&tmp_tarball_path)?;
+        let mut tmp_tarball = std::fs::OpenOptions::new().read(true).write(true).create(true).open(&tmp_tarball_path)?;
         // download asset
         println!("Downloading new version from {}", &self.url);
         let mut headers = reqwest::header::HeaderMap::new();
@@ -48,23 +39,14 @@ impl ReleaseAsset {
             let mut slice: &[u8] = bytes.as_ref();
             std::io::copy(&mut slice, &mut tmp_tarball)?;
             // extract tarball into binary
-            println!(
-                "Extract release asset to binary from {} to {}",
-                self.name, bin_name
-            );
+            println!("Extract release asset to binary from {} to {}", self.name, bin_name);
             tmp_tarball.seek(std::io::SeekFrom::Start(0))?;
             let decompressed = flate2::read::GzDecoder::new(tmp_tarball);
             let mut archive = tar::Archive::new(decompressed);
-            let entry = archive.entries().unwrap().find(|x| {
-                x.as_ref()
-                    .unwrap()
-                    .header()
-                    .path()
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    == bin_name
-            });
+            let entry = archive
+                .entries()
+                .unwrap()
+                .find(|x| x.as_ref().unwrap().header().path().unwrap().to_str().unwrap() == bin_name);
             if let Some(entry) = entry {
                 entry?.unpack_in(tmp_dir_path)?;
                 // replace binary
@@ -77,35 +59,22 @@ impl ReleaseAsset {
                         std::fs::rename(&tmp, dest)?;
                         Err(Box::new(e))
                     } else {
-                        println!(
-                            "Update success, please run \"{} --version\" to verify.",
-                            bin_name.clone()
-                        );
+                        println!("Update success, please run \"{} --version\" to verify.", bin_name.clone());
                         Ok(())
                     }
                 } else {
                     std::fs::rename(src, dest)?;
-                    println!(
-                        "Update success, please run \"{} --version\" to verify.",
-                        bin_name.clone()
-                    );
+                    println!("Update success, please run \"{} --version\" to verify.", bin_name.clone());
                     Ok(())
                 }
             } else {
                 Err(wt_error::WTError::new_boxed(
                     "000000",
-                    &format!(
-                        "Cannot find entry \"{}\" from tarball \"{}\"",
-                        bin_name,
-                        tmp_tarball_path.to_str().unwrap()
-                    ),
+                    &format!("Cannot find entry \"{}\" from tarball \"{}\"", bin_name, tmp_tarball_path.to_str().unwrap()),
                 ))
             }
         } else {
-            Err(wt_error::WTError::new_boxed(
-                "000000",
-                &format!("Download asset failed with status code {}", res.status()),
-            ))
+            Err(wt_error::WTError::new_boxed("000000", &format!("Download asset failed with status code {}", res.status())))
         }
     }
 }
@@ -126,10 +95,7 @@ impl Release {
         let mut headers = reqwest::header::HeaderMap::new();
         headers.insert("User-Agent", crate_name!().parse()?);
         headers.insert("content-type", "application/json".parse()?);
-        let req = reqwest::Client::new().request(
-            reqwest::Method::GET,
-            "https://api.github.com/repos/shaunxu/pingcode-cli/releases/latest",
-        );
+        let req = reqwest::Client::new().request(reqwest::Method::GET, "https://api.github.com/repos/shaunxu/pingcode-cli/releases/latest");
         let res = req.headers(headers).send().await?;
         if res.status().is_success() {
             let release: Release = res.json().await?;
@@ -137,10 +103,7 @@ impl Release {
         } else {
             Err(wt_error::WTError::new_boxed(
                 "000000",
-                &format!(
-                    "Download latest release metadata failed with status code {}",
-                    res.status()
-                ),
+                &format!("Download latest release metadata failed with status code {}", res.status()),
             ))
         }
     }
@@ -173,28 +136,18 @@ impl Updater {
         } {
             let release = Release::latest().await?;
             if let Some(asset) = release.get_update_asset(format!("pc-{}-x64.tar.gz", platform))? {
-                println!(
-                    "New version {} avavilable. (Your are running v{})",
-                    release.tag_name,
-                    crate_version!()
-                );
+                println!("New version {} avavilable. (Your are running v{})", release.tag_name, crate_version!());
                 if !dry_run {
                     asset.perform_update(String::from(bin_name)).await
                 } else {
                     Ok(())
                 }
             } else {
-                println!(
-                    "Your are running the latest version v{}, enjoy.",
-                    crate_version!()
-                );
+                println!("Your are running the latest version v{}, enjoy.", crate_version!());
                 Ok(())
             }
         } else {
-            Err(wt_error::WTError::new_boxed(
-                "000000",
-                "Unknown operation system",
-            ))
+            Err(wt_error::WTError::new_boxed("000000", "Unknown operation system"))
         }
     }
 }

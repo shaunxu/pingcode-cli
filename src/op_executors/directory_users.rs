@@ -7,11 +7,7 @@ use clap::ArgMatches;
 
 pub struct DirectoryUsersGetOpExecutor {}
 impl OpExecutor for DirectoryUsersGetOpExecutor {
-    fn on_execute<'a>(
-        &self,
-        matches: &'a ArgMatches,
-        _context: &OpContext,
-    ) -> Result<OpRequest<'a>, AnyError> {
+    fn on_execute<'a>(&self, matches: &'a ArgMatches, _context: &OpContext) -> Result<OpRequest<'a>, AnyError> {
         Ok(OpRequest {
             method: reqwest::Method::GET,
             param: matches.value_of("id"),
@@ -24,11 +20,7 @@ impl OpExecutor for DirectoryUsersGetOpExecutor {
 
 pub struct DirectoryUsersListOpExecutor {}
 impl OpExecutor for DirectoryUsersListOpExecutor {
-    fn on_execute<'a>(
-        &self,
-        matches: &'a ArgMatches,
-        context: &OpContext,
-    ) -> Result<OpRequest<'a>, AnyError> {
+    fn on_execute<'a>(&self, matches: &'a ArgMatches, context: &OpContext) -> Result<OpRequest<'a>, AnyError> {
         Ok(OpRequest {
             method: reqwest::Method::GET,
             param: None,
