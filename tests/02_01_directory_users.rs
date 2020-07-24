@@ -95,8 +95,16 @@ fn t02_directory_users_get() -> helper::TestResult {
     assert_eq!(result.name, "shaunxu1");
     assert_eq!(result.display_name, "shaunxu1");
     assert_eq!(result.id, "6be9cd1b050e4afc932d00b7e8db2961");
-    assert_eq!(result.url, "https://open.worktile.com/v1/directory/users/6be9cd1b050e4afc932d00b7e8db2961");
-    assert_eq!(result.avatar, Some(String::from("https://s3.cn-north-1.amazonaws.com.cn/lcavatar/default_160x160.png")));
+    assert_eq!(
+        result.url,
+        "https://open.worktile.com/v1/directory/users/6be9cd1b050e4afc932d00b7e8db2961"
+    );
+    assert_eq!(
+        result.avatar,
+        Some(String::from(
+            "https://s3.cn-north-1.amazonaws.com.cn/lcavatar/default_160x160.png"
+        ))
+    );
 
     Ok(())
 }

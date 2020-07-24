@@ -62,12 +62,7 @@ impl WTClientConfig {
         let content = serde_json::to_string(self)?;
         let mc = new_magic_crypt!(PC_CLIENT_JSON_ENCRYPTION_KEY, 256);
         let base64 = mc.encrypt_str_to_base64(content);
-        let mut file = std::fs::OpenOptions::new()
-            .read(true)
-            .write(true)
-            .create(true)
-            .open(path)
-            .unwrap();
+        let mut file = std::fs::OpenOptions::new().read(true).write(true).create(true).open(path).unwrap();
         write!(file, "{}", base64)?;
         Ok(())
     }
@@ -89,10 +84,7 @@ pub struct Parent {
 
 impl Parent {
     pub fn new(resource: String, param: String) -> Parent {
-        Parent {
-            resource: resource,
-            param: param,
-        }
+        Parent { resource: resource, param: param }
     }
 }
 
@@ -147,10 +139,7 @@ impl WTClient {
         // try load config and process auth if not login
         let config = WTClientConfig::load(WTClient::get_client_path());
         if config.access_token.is_none() {
-            if config.client_id.is_none()
-                || config.client_secret.is_none()
-                || config.api_endpoint.is_none()
-            {
+            if config.client_id.is_none() || config.client_secret.is_none() || config.api_endpoint.is_none() {
                 return Err(WTError::new_boxed("000000", "Please login first"));
             } else {
                 WTClient::auth(
@@ -166,12 +155,7 @@ impl WTClient {
         // load config again after auth to process the underlying request
         let config = WTClientConfig::load(WTClient::get_client_path());
         let mut headers = HeaderMap::new();
-        headers.insert(
-            "authorization",
-            format!("Bearer {}", config.access_token.unwrap())
-                .parse()
-                .unwrap(),
-        );
+        headers.insert("authorization", format!("Bearer {}", config.access_token.unwrap()).parse().unwrap());
         headers.insert("content-type", "application/json".parse().unwrap());
         let mut uri = std::path::PathBuf::new();
         uri.push(&format!("v{}", &config.version.unwrap()));
@@ -189,30 +173,15 @@ impl WTClient {
         if let Some(param) = param {
             uri.push(param);
         }
-        WTClient::request_internal(
-            method,
-            &config.api_endpoint.unwrap(),
-            uri.to_str().unwrap(),
-            query,
-            body,
-            Some(headers),
-        )
-        .await
+        WTClient::request_internal(method, &config.api_endpoint.unwrap(), uri.to_str().unwrap(), query, body, Some(headers)).await
     }
 
-    pub async fn auth(
-        client_id: &String,
-        client_secret: &String,
-        api_endpoint: &String,
-        version: &String,
-    ) -> Result<(), AnyError> {
+    pub async fn auth(client_id: &String, client_secret: &String, api_endpoint: &String, version: &String) -> Result<(), AnyError> {
         let uri = format!(
             "v{}/auth/token?grant_type=client_credentials&client_id={}&client_secret={}",
             version, client_id, client_secret
         );
-        let res: AuthResponse = serde_json::from_value(
-            WTClient::request_internal(Method::GET, &api_endpoint, &uri, None, None, None).await?,
-        )?;
+        let res: AuthResponse = serde_json::from_value(WTClient::request_internal(Method::GET, &api_endpoint, &uri, None, None, None).await?)?;
         let config = WTClientConfig::new(
             Some(api_endpoint.clone()),
             Some(version.clone()),
@@ -225,8 +194,7 @@ impl WTClient {
     }
 
     pub async fn ping() -> Result<String, AnyError> {
-        let res =
-            WTClient::request(Method::GET, Some("auth"), "ping", None, None, None, None).await?;
+        let res = WTClient::request(Method::GET, Some("auth"), "ping", None, None, None, None).await?;
         let res: serde_json::Value = serde_json::from_value(res)?;
         if let serde_json::Value::String(pong) = &res["data"] {
             Ok(pong.clone())

@@ -7,11 +7,7 @@ use clap::ArgMatches;
 
 pub struct AgileProjectGetOpExecutor {}
 impl OpExecutor for AgileProjectGetOpExecutor {
-    fn on_execute<'a>(
-        &self,
-        matches: &'a ArgMatches,
-        _context: &OpContext,
-    ) -> Result<OpRequest<'a>, AnyError> {
+    fn on_execute<'a>(&self, matches: &'a ArgMatches, _context: &OpContext) -> Result<OpRequest<'a>, AnyError> {
         Ok(OpRequest {
             method: reqwest::Method::GET,
             param: matches.value_of("id"),
@@ -24,11 +20,7 @@ impl OpExecutor for AgileProjectGetOpExecutor {
 
 pub struct AgileProjectListOpExecutor {}
 impl OpExecutor for AgileProjectListOpExecutor {
-    fn on_execute<'a>(
-        &self,
-        matches: &'a ArgMatches,
-        context: &OpContext,
-    ) -> Result<OpRequest<'a>, AnyError> {
+    fn on_execute<'a>(&self, matches: &'a ArgMatches, context: &OpContext) -> Result<OpRequest<'a>, AnyError> {
         Ok(OpRequest {
             method: reqwest::Method::GET,
             param: None,

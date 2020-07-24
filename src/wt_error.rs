@@ -22,11 +22,7 @@ impl WTError {
 
 impl std::fmt::Display for WTError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(
-            f,
-            "code = \"{}\", message = \"{}\"",
-            self.code, self.message
-        )
+        write!(f, "code = \"{}\", message = \"{}\"", self.code, self.message)
     }
 }
 

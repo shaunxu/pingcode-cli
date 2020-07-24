@@ -8,10 +8,7 @@ use clap::ArgMatches;
 pub struct ArgParser {}
 
 impl ArgParser {
-    pub fn parse_query(
-        matches: &ArgMatches,
-        keys: std::vec::Vec<String>,
-    ) -> std::vec::Vec<(String, String)> {
+    pub fn parse_query(matches: &ArgMatches, keys: std::vec::Vec<String>) -> std::vec::Vec<(String, String)> {
         let mut query = std::vec::Vec::<(String, String)>::new();
         for key in keys.iter() {
             if let Some(value) = matches.value_of(key) {
@@ -21,10 +18,7 @@ impl ArgParser {
         query
     }
 
-    pub fn parse_query_from_args(
-        matches: &ArgMatches,
-        ctx: &OpContext,
-    ) -> std::vec::Vec<(String, String)> {
+    pub fn parse_query_from_args(matches: &ArgMatches, ctx: &OpContext) -> std::vec::Vec<(String, String)> {
         ArgParser::parse_query(matches, ctx.arg_names.clone())
     }
 
@@ -39,32 +33,21 @@ impl ArgParser {
         }
     }
 
-    pub fn parse_content_to_json(
-        matches: &ArgMatches,
-    ) -> Result<Option<serde_json::Value>, AnyError> {
+    pub fn parse_content_to_json(matches: &ArgMatches) -> Result<Option<serde_json::Value>, AnyError> {
         if let Some(raw) = ArgParser::parse_content(matches) {
             match serde_json::from_str(&raw) {
                 Ok(json) => Ok(Some(json)),
-                Err(e) => Err(WTError::new_boxed(
-                    "000000",
-                    &format!("Failed to parse content in JSON format. {}", e),
-                )),
+                Err(e) => Err(WTError::new_boxed("000000", &format!("Failed to parse content in JSON format. {}", e))),
             }
         } else {
             Ok(Some(serde_json::Value::default()))
         }
     }
 
-    pub fn parse_parents(
-        matches: &ArgMatches,
-        resource_and_args: std::vec::Vec<(&str, &str)>,
-    ) -> std::vec::Vec<Parent> {
+    pub fn parse_parents(matches: &ArgMatches, resource_and_args: std::vec::Vec<(&str, &str)>) -> std::vec::Vec<Parent> {
         let mut parents: std::vec::Vec<Parent> = vec![];
         for (resource, arg) in resource_and_args.iter() {
-            parents.push(Parent::new(
-                String::from(*resource),
-                String::from(matches.value_of(arg).unwrap()),
-            ));
+            parents.push(Parent::new(String::from(*resource), String::from(matches.value_of(arg).unwrap())));
         }
         parents
     }

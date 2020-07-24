@@ -14,11 +14,7 @@ pub struct OpRequest<'a> {
 }
 
 pub trait OpExecutor {
-    fn on_execute<'a>(
-        &self,
-        matches: &'a ArgMatches,
-        context: &OpContext,
-    ) -> Result<OpRequest<'a>, AnyError>;
+    fn on_execute<'a>(&self, matches: &'a ArgMatches, context: &OpContext) -> Result<OpRequest<'a>, AnyError>;
 
     fn execute(&self, matches: &ArgMatches, context: &OpContext) -> Result<(), AnyError> {
         let req = self.on_execute(matches, context)?;

@@ -90,6 +90,21 @@
                                 "name": "content-and-input"
                             }
                         ]
+                    },
+                    {
+                        "name": "update",
+                        "description": "Update an existing feature",
+                        "args": [
+                            {
+                                "name": "id",
+                                "take_value": true,
+                                "required": true,
+                                "description": "The id of the feature will be updated"
+                            },
+                            {
+                                "name": "content-and-input"
+                            }
+                        ]
                     }
                 ]
             },
@@ -101,6 +116,21 @@
                         "name": "create",
                         "description": "Create a new user story",
                         "args": [
+                            {
+                                "name": "content-and-input"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "update",
+                        "description": "Update an existing user story",
+                        "args": [
+                            {
+                                "name": "id",
+                                "take_value": true,
+                                "required": true,
+                                "description": "The id of the user story will be updated"
+                            },
                             {
                                 "name": "content-and-input"
                             }
@@ -120,6 +150,21 @@
                                 "name": "content-and-input"
                             }
                         ]
+                    },
+                    {
+                        "name": "update",
+                        "description": "Update an existing task",
+                        "args": [
+                            {
+                                "name": "id",
+                                "take_value": true,
+                                "required": true,
+                                "description": "The id of the task will be updated"
+                            },
+                            {
+                                "name": "content-and-input"
+                            }
+                        ]
                     }
                 ]
             },
@@ -131,6 +176,21 @@
                         "name": "create",
                         "description": "Create a new bug",
                         "args": [
+                            {
+                                "name": "content-and-input"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "update",
+                        "description": "Update an existing bug",
+                        "args": [
+                            {
+                                "name": "id",
+                                "take_value": true,
+                                "required": true,
+                                "description": "The id of the bug will be updated"
+                            },
                             {
                                 "name": "content-and-input"
                             }
@@ -215,13 +275,25 @@
                     },
                     {
                         "name": "delete",
-                        "description": "Delete a workitems by id",
+                        "description": "Delete a workitem by id",
                         "args": [
                             {
                                 "name": "id",
                                 "take_value": true,
                                 "required": true,
                                 "description": "The id of the workitem will be deleted"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "get",
+                        "description": "Get a workitem by id",
+                        "args": [
+                            {
+                                "name": "id",
+                                "take_value": true,
+                                "required": true,
+                                "description": "The id of the workitem"
                             }
                         ]
                     }
