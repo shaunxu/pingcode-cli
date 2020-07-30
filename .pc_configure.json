@@ -359,6 +359,58 @@
                         ]
                     }
                 ]
+            },
+            {
+                "name": "states",
+                "description": "Manage your agile state for workitems",
+                "ops": [
+                    {
+                        "name": "get",
+                        "description": "Get a state by id",
+                        "args": [
+                            {
+                                "name": "id",
+                                "take_value": true,
+                                "required": true,
+                                "description": "The id of the state will be get"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "list",
+                        "description": "Get all states",
+                        "args": [
+                            {
+                                "name": "project-type",
+                                "take_value": true,
+                                "possible_values": [
+                                    "scrum",
+                                    "kanban"
+                                ],
+                                "description": "The project type which states apples to"
+                            },
+                            {
+                                "name": "work-item-type",
+                                "take_value": true,
+                                "possible_values": [
+                                    "epic",
+                                    "feature",
+                                    "story",
+                                    "task",
+                                    "bug",
+                                    "issue"
+                                ],
+                                "description": "The workitem type which states apples to"
+                            },
+                            {
+                                "name": "page-index"
+                            },
+                            {
+                                "name": "page-size"
+                            }
+                        ]
+                    }
+                ]
             }
         ]
     },

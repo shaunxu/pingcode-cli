@@ -102,21 +102,25 @@ impl WTClient {
         headers: Option<HeaderMap>,
     ) -> Result<serde_json::Value, AnyError> {
         let url = format!("{}/{}", api_endpoint, uri);
-        let mut req = Client::new().request(method, &url);
-        req = match headers {
-            Some(headers) => req.headers(headers),
-            None => req,
-        };
-        req = match body {
-            Some(body) => req.json(body),
-            None => req,
-        };
-        req = match query {
-            Some(queries) => req.query(&queries),
-            None => req,
-        };
+        let client = Client::new();
+        let mut builder = client.request(method, &url);
+        if let Some(headers) = headers {
+            builder = builder.headers(headers);
+        }
+        if let Some(body) = body {
+            builder = builder.json(body);
+        }
+        if let Some(queries) = query {
+            builder = builder.query(&queries);
+        }
+        let request = builder.build()?;
 
-        let res = req.send().await?;
+        debug!("{} {} - Body = {}", request.method(), request.url(), match body {
+            Some(body) => body.to_string(),
+            None => String::from("None")
+        });
+
+        let res = client.execute(request).await?;
         if res.status().is_success() {
             Ok(res.json().await?)
         } else if res.status().is_client_error() {
