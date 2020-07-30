@@ -6,6 +6,7 @@ pub mod agile_projects;
 pub mod agile_stories;
 pub mod agile_tasks;
 pub mod agile_workitems;
+pub mod agile_states;
 pub mod directory_users;
 pub mod op_executor;
 
@@ -45,6 +46,9 @@ impl OpExecutors {
             String::from("agile_participants_remove"),
             Box::new(agile_participants::AgileParticipantsRemoveOpExecutor {}),
         );
+        es.insert(String::from("agile_states_get"), Box::new(agile_states::AgileStateGetOpExecutor {}));
+        es.insert(String::from("agile_states_list"), Box::new(agile_states::AgileStateListOpExecutor {}));
+
 
         OpExecutors { executors: es }
     }

@@ -58,7 +58,7 @@ struct Assignee {
     pub url: String,
     pub name: String,
     pub display_name: String,
-    pub avatar: String,
+    pub avatar: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]

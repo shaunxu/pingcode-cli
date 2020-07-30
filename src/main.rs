@@ -2,6 +2,8 @@
 extern crate clap;
 #[macro_use]
 extern crate magic_crypt;
+#[macro_use]
+extern crate log;
 extern crate semver;
 
 use clap::{Arg, SubCommand};
@@ -37,6 +39,8 @@ USAGE:
 const PC_CONFIGURE_JSON: &'static str = include_str!("../.pc_configure.json");
 
 fn main() -> Result<(), AnyError> {
+    env_logger::init();
+
     let mut app = app_from_crate!().template(CLAP_TEMPLATE).help_message("Help").version_message("Version");
     app = app.arg(
         Arg::with_name("pretty")
